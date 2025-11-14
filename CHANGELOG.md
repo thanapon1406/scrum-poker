@@ -17,6 +17,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Delete button (🗑️) appears only for host
   - Confirmation dialog before deletion
   - UI-level restriction (host-only visibility)
+- **Host Notes After Voting**: Host can add notes/explanations after revealing votes
+  - Add context for conflicts or decisions
+  - Saves to topic description field
+  - Inline editing with save/cancel
+  - Visible to all participants
+  - Helpful for documenting why certain estimates were chosen
 
 ### Changed
 - **Vote Calculation**: Changed from average to mode (most selected card)

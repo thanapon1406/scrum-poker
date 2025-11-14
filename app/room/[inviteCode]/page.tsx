@@ -572,6 +572,9 @@ export default function RoomPage() {
                     votes={votesWithParticipants}
                     averageScore={activeTopic.average_score}
                     isRevealed={activeTopic.is_revealed}
+                    topic={activeTopic}
+                    isHost={currentUser?.is_host || false}
+                    onTopicUpdated={loadTopics}
                   />
                 )}
 

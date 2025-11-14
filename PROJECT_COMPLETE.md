@@ -95,8 +95,9 @@ A **production-ready**, **fully-functional** Planning Poker application with:
 - [x] Voting cards (0, 1/2, 1, 2, 3.5, 5, 7, 10.5, 14, 21, 40, ?, ☕)
 - [x] Results panel with mode calculation
 - [x] Tie detection (shows "X or Y" format)
+- [x] Host can add notes after revealing votes
 - [x] Host controls (reveal/reset)
-- [x] Topic history with scores
+- [x] Topic history with scores and notes
 
 ### ⚡ Real-time Features
 - [x] Supabase Realtime WebSocket

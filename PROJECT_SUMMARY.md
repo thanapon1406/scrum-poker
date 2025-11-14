@@ -81,8 +81,9 @@ planningpokeronlineforfree/
 - [x] Create topics/stories (host only)
 - [x] Select active topic (host only)
 - [x] Delete topics (host only)
+- [x] Add notes/explanations after revealing votes (host only)
 - [x] View all topics in a room
-- [x] See completed topics with scores
+- [x] See completed topics with scores and notes
 - [x] Topic history per room
 
 ### ✅ Participant Features
