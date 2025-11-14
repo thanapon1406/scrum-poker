@@ -61,7 +61,12 @@ Open [http://localhost:3000](http://localhost:3000) 🎉
 1. Click **"Create Room"**
 2. Enter your name and join as host
 3. Share the room code with a teammate (or open in another browser tab)
-4. Create a topic, vote, and reveal!
+4. Create a topic (as host)
+5. Vote on the topic
+6. Reveal votes and see the mode result
+7. **Try new features:**
+   - Click the edit icon (✏️) next to your name to change it
+   - As host, hover over topics to see the delete button (🗑️)
 
 ## 🎯 Next Steps
 

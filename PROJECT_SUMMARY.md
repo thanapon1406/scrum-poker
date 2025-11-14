@@ -67,19 +67,29 @@ planningpokeronlineforfree/
 - [x] Room header with shareable invite code
 
 ### ✅ Voting System
-- [x] Modified Fibonacci deck: 0, 1, 2, 3, 5, 8, 13, 21, ?, ☕
+- [x] Custom deck: 0, 1/2, 1, 2, 3.5, 5, 7, 10.5, 14, 21, 40, ?, ☕
+- [x] Time estimates for each card (hours)
 - [x] Real-time vote submission
 - [x] Vote status visibility (who voted, not what)
 - [x] Reveal votes (host only)
 - [x] Reset votes (host only)
-- [x] Automatic average calculation (excludes ? and ☕)
+- [x] Mode calculation (most selected card)
+- [x] Tie detection with "X or Y" display
+- [x] Automatic score calculation (excludes ? and ☕)
 
 ### ✅ Topic Management
 - [x] Create topics/stories (host only)
 - [x] Select active topic (host only)
+- [x] Delete topics (host only)
 - [x] View all topics in a room
 - [x] See completed topics with scores
 - [x] Topic history per room
+
+### ✅ Participant Features
+- [x] Edit your own display name
+- [x] Real-time name updates
+- [x] Inline editing with save/cancel
+- [x] Name validation (2-50 characters)
 
 ### ✅ Real-time Synchronization
 - [x] Supabase Realtime integration

@@ -332,17 +332,23 @@ RoomPage (app/room/[inviteCode]/page.tsx)
   │   └── Invite code display & copy button
   │
   ├── ParticipantList
-  │   └── Participant items (with vote status)
+  │   ├── Participant items (with vote status)
+  │   └── Edit name button (own participant only)
+  │       ├── Inline input field
+  │       ├── Save button (✓)
+  │       └── Cancel button (✗)
   │
   ├── TopicManager
   │   ├── Topic creation form (host only)
-  │   └── Topic list items
+  │   ├── Topic list items
+  │   └── Delete button per topic (host only)
   │
-  ├── VotingCard (×10)
-  │   └── Individual cards (0-21, ?, ☕)
+  ├── VotingCard (×13)
+  │   └── Cards: 0, 1/2, 1, 2, 3.5, 5, 7, 10.5, 14, 21, 40, ?, ☕
   │
   ├── ResultsPanel
-  │   ├── Average score display
+  │   ├── Final result display (mode calculation)
+  │   ├── Tie handling ("X or Y" format)
   │   ├── Vote distribution chart
   │   └── Individual votes list
   │
