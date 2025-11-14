@@ -519,6 +519,7 @@ export default function RoomPage() {
               participants={participants}
               votedParticipantIds={votedParticipantIds}
               currentUserId={currentUser?.id}
+              onParticipantUpdated={loadParticipants}
             />
 
             <TopicManager
