@@ -43,6 +43,7 @@ export default function RoomPage() {
   // Initialize room
   useEffect(() => {
     loadRoom()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inviteCode])
 
   // Set up real-time subscriptions
@@ -86,6 +87,7 @@ export default function RoomPage() {
     return () => {
       supabase.removeChannel(channel)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [room, hasJoined, activeTopic])
 
   // Load room data
@@ -134,7 +136,7 @@ export default function RoomPage() {
 
     if (data) {
       setTopics(data)
-      const active = data.find((t) => t.is_active)
+      const active = data.find((t: any) => t.is_active)
       setActiveTopic(active || null)
       if (active) loadVotes(active.id)
     }
