@@ -44,7 +44,8 @@ export default function HomePage() {
       setError('Please enter an invite code')
       return
     }
-    router.push(`/room/${joinCode.trim()}`)
+    // Normalize invite code to uppercase for consistency
+    router.push(`/room/${joinCode.trim().toUpperCase()}`)
   }
 
   return (

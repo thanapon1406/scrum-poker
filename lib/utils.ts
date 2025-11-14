@@ -3,12 +3,13 @@ import { nanoid } from 'nanoid'
 /**
  * Generates a unique, URL-friendly invite code for a room
  * @param length - Length of the code (default: 8)
- * @returns A unique invite code (e.g., "a1b2c3d4")
+ * @returns A unique uppercase invite code (e.g., "A1B2C3D4")
  */
 export function generateInviteCode(length: number = 8): string {
   // Using nanoid with custom alphabet for better readability
   // Excludes confusing characters like 0, O, I, l
-  const alphabet = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz'
+  // Using uppercase only for consistency
+  const alphabet = '123456789ABCDEFGHJKLMNPQRSTUVWXYZ'
   return nanoid(length).split('').map(c => alphabet[Math.abs(c.charCodeAt(0)) % alphabet.length]).join('')
 }
 
