@@ -12,8 +12,9 @@ A fast, simple, and free Planning Poker application for agile teams. Estimate yo
 - **🚀 Instant Room Creation** - Create a room with one click, no sign-up required
 - **🔗 Simple Invite Codes** - Share a short code to invite team members
 - **⚡ Real-time Synchronization** - All votes sync instantly using Supabase Realtime
-- **🎯 Modified Fibonacci Deck** - Standard estimation cards: 0, 1, 2, 3, 5, 8, 13, 21, ?, ☕
-- **📊 Automatic Averaging** - Calculates average scores automatically (excludes ? and ☕)
+- **🎯 Story Point Cards** - Estimation cards: 0, 1/2, 1, 2, 3.5, 5, 7, 10.5, 14, 21, 40, ?, ☕
+- **📊 Most Selected Card** - Shows the most frequently voted card (excludes ? and ☕)
+- **⏱️ Time Estimates** - Each card shows estimated hours for planning
 - **📜 Voting History** - Track all estimated topics and their final scores
 - **👥 Participant Status** - See who has voted in real-time
 - **🎨 Clean, Minimal UI** - Inspired by planningpokeronline.com

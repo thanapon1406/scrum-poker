@@ -26,13 +26,13 @@ export default function VotingCard({
       '1/2': '0.5h',
       '1': '1h',
       '2': '2h',
-      '3': '3.5h',
+      '3.5': '3.5h',
       '5': '5h',
-      '8': '7h',
-      '13': '14h',
-      '20': '21h',
-      '40': '35h',
-      '100': '70h',
+      '7': '7h',
+      '10.5': '10.5h',
+      '14': '14h',
+      '21': '21h',
+      '40': '40h',
       '?': '?',
       '☕': '☕',
     }
@@ -48,17 +48,15 @@ export default function VotingCard({
         'hover:scale-105 active:scale-95',
         'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100',
         'flex flex-col items-center justify-center gap-1',
+        'bg-white text-slate-700 border-2 shadow-sm',
         isSelected
-          ? `${colorClass} text-white shadow-lg scale-105 ring-4 ring-primary-400`
-          : 'bg-white text-slate-700 border-2 border-slate-300 hover:border-primary-400 shadow-sm'
+          ? 'border-primary-500 border-4 shadow-lg scale-105'
+          : 'border-slate-300 hover:border-primary-400'
       )}
     >
       <span className="text-3xl">{value}</span>
       {value !== '?' && value !== '☕' && (
-        <span className={clsx(
-          'text-xs font-normal',
-          isSelected ? 'text-white/80' : 'text-slate-500'
-        )}>
+        <span className="text-xs font-normal text-slate-500">
           {getEstimateTime(value)}
         </span>
       )}

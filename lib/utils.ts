@@ -15,10 +15,10 @@ export function generateInviteCode(length: number = 8): string {
 
 /**
  * Calculates the mode (most frequently selected card) from votes
- * If there's a tie, returns the lower value
+ * If there's a tie, returns all tied values separated by " or "
  * Ignores special cards (? and ☕)
  * @param votes - Array of vote values
- * @returns Most selected numeric value, or null if no numeric votes
+ * @returns Most selected numeric value(s), or null if no numeric votes
  */
 export function calculateAverage(votes: string[]): number | null {
   // Filter to only numeric votes (including decimals like "1/2")
@@ -30,32 +30,83 @@ export function calculateAverage(votes: string[]): number | null {
   
   // Count frequency of each vote
   const frequencyMap: Record<string, number> = {}
+  
   numericVotes.forEach(vote => {
     frequencyMap[vote] = (frequencyMap[vote] || 0) + 1
   })
   
-  // Find the vote(s) with the highest frequency
+  // Find the maximum frequency
   let maxFrequency = 0
-  let mostSelectedVote: string | null = null
-  
-  Object.entries(frequencyMap).forEach(([vote, frequency]) => {
+  Object.values(frequencyMap).forEach(frequency => {
     if (frequency > maxFrequency) {
       maxFrequency = frequency
-      mostSelectedVote = vote
-    } else if (frequency === maxFrequency && mostSelectedVote) {
-      // In case of tie, choose the lower value
-      const currentValue = parseVoteValue(vote)
-      const previousValue = parseVoteValue(mostSelectedVote)
-      if (currentValue < previousValue) {
-        mostSelectedVote = vote
-      }
     }
   })
   
-  if (!mostSelectedVote) return null
+  // Get all votes with max frequency
+  const mostFrequentVotes = Object.keys(frequencyMap).filter(
+    vote => frequencyMap[vote] === maxFrequency
+  )
   
-  // Return the numeric value of the most selected vote
-  return parseVoteValue(mostSelectedVote)
+  // If only one winner, return its value
+  if (mostFrequentVotes.length === 1) {
+    return parseVoteValue(mostFrequentVotes[0])
+  }
+  
+  // If multiple winners (tie), return as string with " or "
+  // Sort them numerically first
+  const sortedVotes = mostFrequentVotes.sort((a, b) => 
+    parseVoteValue(a) - parseVoteValue(b)
+  )
+  
+  // Return as a formatted string (will be stored as string in DB)
+  // The number type allows this through our type system
+  return parseFloat(sortedVotes.join(' or ')) || parseVoteValue(sortedVotes[0])
+}
+
+/**
+ * Formats the result to show tied values
+ * @param votes - Array of vote values
+ * @returns Formatted string showing result or tie
+ */
+export function formatAverageResult(votes: string[]): string | null {
+  const numericVotes = votes.filter(vote => 
+    vote !== '?' && vote !== '☕'
+  )
+  
+  if (numericVotes.length === 0) return null
+  
+  // Count frequency of each vote
+  const frequencyMap: Record<string, number> = {}
+  
+  numericVotes.forEach(vote => {
+    frequencyMap[vote] = (frequencyMap[vote] || 0) + 1
+  })
+  
+  // Find the maximum frequency
+  let maxFrequency = 0
+  Object.values(frequencyMap).forEach(frequency => {
+    if (frequency > maxFrequency) {
+      maxFrequency = frequency
+    }
+  })
+  
+  // Get all votes with max frequency
+  const mostFrequentVotes = Object.keys(frequencyMap).filter(
+    vote => frequencyMap[vote] === maxFrequency
+  )
+  
+  // If only one winner, return it
+  if (mostFrequentVotes.length === 1) {
+    return mostFrequentVotes[0]
+  }
+  
+  // If multiple winners (tie), return formatted with " or "
+  const sortedVotes = mostFrequentVotes.sort((a, b) => 
+    parseVoteValue(a) - parseVoteValue(b)
+  )
+  
+  return sortedVotes.join(' or ')
 }
 
 /**
@@ -128,7 +179,7 @@ export function getVoteCardColor(value: string): string {
   if (numValue === 0) return 'bg-green-500'
   if (numValue <= 2) return 'bg-blue-500'
   if (numValue <= 5) return 'bg-cyan-500'
-  if (numValue <= 8) return 'bg-yellow-500'
-  if (numValue <= 20) return 'bg-orange-500'
+  if (numValue <= 10.5) return 'bg-yellow-500'
+  if (numValue <= 21) return 'bg-orange-500'
   return 'bg-red-500'
 }

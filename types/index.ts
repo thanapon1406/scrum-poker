@@ -24,13 +24,13 @@ export const VOTE_VALUES = [
   '1/2',    // 0.5 hours
   '1',      // 1 hour
   '2',      // 2 hours
-  '3',      // 3.5 hours
+  '3.5',    // 3.5 hours
   '5',      // 5 hours
-  '8',      // 7 hours
-  '13',     // 14 hours (2 days)
-  '20',     // 21 hours (3 days)
-  '40',     // 35 hours (1 week)
-  '100',    // 70 hours (2 weeks)
+  '7',      // 7 hours
+  '10.5',   // 10.5 hours
+  '14',     // 14 hours (2 days)
+  '21',     // 21 hours (3 days)
+  '40',     // 40 hours (1 week)
   '?',      // Unknown
   '☕',     // Break
 ] as const

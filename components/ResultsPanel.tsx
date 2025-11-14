@@ -1,7 +1,7 @@
 'use client'
 
 import { VoteWithParticipant } from '@/types'
-import { getVoteCardColor } from '@/lib/utils'
+import { getVoteCardColor, formatAverageResult } from '@/lib/utils'
 import clsx from 'clsx'
 
 interface ResultsPanelProps {
@@ -46,6 +46,9 @@ export default function ResultsPanel({
     )
   }
 
+  // Get formatted result (handles ties)
+  const resultText = formatAverageResult(votes.map(v => v.vote_value))
+
   // Calculate vote distribution
   const voteDistribution = votes.reduce((acc, vote) => {
     acc[vote.vote_value] = (acc[vote.vote_value] || 0) + 1
@@ -70,11 +73,11 @@ export default function ResultsPanel({
         Results
       </h2>
 
-      {/* Average Score */}
-      {averageScore !== null && (
+      {/* Final Result (Mode) */}
+      {resultText && (
         <div className="bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-xl p-6 mb-6 text-center">
-          <p className="text-sm font-medium opacity-90 mb-1">Average Score</p>
-          <p className="text-5xl font-bold">{averageScore}</p>
+          <p className="text-sm font-medium opacity-90 mb-1">Final Result</p>
+          <p className="text-5xl font-bold">{resultText}</p>
         </div>
       )}
 
