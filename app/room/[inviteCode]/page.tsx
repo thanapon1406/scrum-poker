@@ -40,56 +40,6 @@ export default function RoomPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
-  // Initialize room
-  useEffect(() => {
-    loadRoom()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [inviteCode])
-
-  // Set up real-time subscriptions
-  useEffect(() => {
-    if (!room || !hasJoined) return
-
-    const channel = supabase.channel(`room:${room.id}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'participants',
-          filter: `room_id=eq.${room.id}`,
-        },
-        () => loadParticipants()
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'topics',
-          filter: `room_id=eq.${room.id}`,
-        },
-        () => loadTopics()
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'votes',
-        },
-        () => {
-          if (activeTopic) loadVotes(activeTopic.id)
-        }
-      )
-      .subscribe()
-
-    return () => {
-      supabase.removeChannel(channel)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [room, hasJoined, activeTopic])
-
   // Load room data
   const loadRoom = async () => {
     try {
@@ -145,11 +95,94 @@ export default function RoomPage() {
   const loadVotes = async (topicId: string) => {
     const { data } = await supabase
       .from('votes')
-      .select('*')
+      .select(`
+        *,
+        participant:participants(*)
+      `)
       .eq('topic_id', topicId)
 
-    if (data) setVotes(data)
+    if (data) setVotes(data as any)
   }
+
+  // Restore participant from localStorage
+  const restoreParticipant = async (participantId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('participants')
+        .select('*')
+        .eq('id', participantId)
+        .single()
+
+      if (data && !error) {
+        setCurrentUser(data)
+        setHasJoined(true)
+        loadParticipants()
+        loadTopics()
+      } else {
+        // Participant not found, clear localStorage
+        localStorage.removeItem(`participant_${inviteCode}`)
+      }
+    } catch (err) {
+      console.error('Error restoring participant:', err)
+      localStorage.removeItem(`participant_${inviteCode}`)
+    }
+  }
+
+  // Initialize room and restore participant from localStorage
+  useEffect(() => {
+    loadRoom()
+    
+    // Try to restore participant from localStorage
+    const savedParticipantId = localStorage.getItem(`participant_${inviteCode}`)
+    if (savedParticipantId) {
+      restoreParticipant(savedParticipantId)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inviteCode])
+
+  // Set up real-time subscriptions
+  useEffect(() => {
+    if (!room || !hasJoined) return
+
+    const channel = supabase.channel(`room:${room.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'participants',
+          filter: `room_id=eq.${room.id}`,
+        },
+        () => loadParticipants()
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'topics',
+          filter: `room_id=eq.${room.id}`,
+        },
+        () => loadTopics()
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'votes',
+        },
+        () => {
+          if (activeTopic) loadVotes(activeTopic.id)
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [room, hasJoined, activeTopic])
 
   // Join room
   const handleJoinRoom = async (e: React.FormEvent) => {
@@ -188,6 +221,9 @@ export default function RoomPage() {
         .single()
 
       if (error) throw error
+
+      // Save participant ID to localStorage
+      localStorage.setItem(`participant_${inviteCode}`, newParticipant.id)
 
       setCurrentUser(newParticipant)
       setHasJoined(true)
@@ -299,6 +335,8 @@ export default function RoomPage() {
   }
 
   const handleLeaveRoom = () => {
+    // Clear participant from localStorage
+    localStorage.removeItem(`participant_${inviteCode}`)
     router.push('/')
   }
 
@@ -394,9 +432,9 @@ export default function RoomPage() {
 
   // Main room interface
   const votedParticipantIds = new Set(votes.map((v) => v.participant_id))
-  const votesWithParticipants: VoteWithParticipant[] = votes.map((vote) => ({
+  const votesWithParticipants: VoteWithParticipant[] = votes.map((vote: any) => ({
     ...vote,
-    participant: participants.find((p) => p.id === vote.participant_id)!,
+    participant: vote.participant || participants.find((p) => p.id === vote.participant_id)!,
   }))
 
   const myVote = votes.find((v) => v.participant_id === currentUser?.id)
