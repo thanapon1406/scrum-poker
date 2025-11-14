@@ -14,19 +14,58 @@ export function generateInviteCode(length: number = 8): string {
 }
 
 /**
- * Calculates the average of numeric votes, ignoring special cards (? and ☕)
+ * Calculates the mode (most frequently selected card) from votes
+ * If there's a tie, returns the lower value
+ * Ignores special cards (? and ☕)
  * @param votes - Array of vote values
- * @returns Average score rounded to 2 decimal places, or null if no numeric votes
+ * @returns Most selected numeric value, or null if no numeric votes
  */
 export function calculateAverage(votes: string[]): number | null {
-  const numericVotes = votes
-    .filter(vote => /^\d+$/.test(vote))
-    .map(Number)
+  // Filter to only numeric votes (including decimals like "1/2")
+  const numericVotes = votes.filter(vote => 
+    vote !== '?' && vote !== '☕'
+  )
   
   if (numericVotes.length === 0) return null
   
-  const sum = numericVotes.reduce((acc, vote) => acc + vote, 0)
-  return Math.round((sum / numericVotes.length) * 100) / 100
+  // Count frequency of each vote
+  const frequencyMap: Record<string, number> = {}
+  numericVotes.forEach(vote => {
+    frequencyMap[vote] = (frequencyMap[vote] || 0) + 1
+  })
+  
+  // Find the vote(s) with the highest frequency
+  let maxFrequency = 0
+  let mostSelectedVote: string | null = null
+  
+  Object.entries(frequencyMap).forEach(([vote, frequency]) => {
+    if (frequency > maxFrequency) {
+      maxFrequency = frequency
+      mostSelectedVote = vote
+    } else if (frequency === maxFrequency && mostSelectedVote) {
+      // In case of tie, choose the lower value
+      const currentValue = parseVoteValue(vote)
+      const previousValue = parseVoteValue(mostSelectedVote)
+      if (currentValue < previousValue) {
+        mostSelectedVote = vote
+      }
+    }
+  })
+  
+  if (!mostSelectedVote) return null
+  
+  // Return the numeric value of the most selected vote
+  return parseVoteValue(mostSelectedVote)
+}
+
+/**
+ * Converts vote string to numeric value for comparison
+ * @param vote - Vote value string
+ * @returns Numeric representation
+ */
+function parseVoteValue(vote: string): number {
+  if (vote === '1/2') return 0.5
+  return parseFloat(vote) || 0
 }
 
 /**
@@ -81,13 +120,15 @@ export async function copyToClipboard(text: string): Promise<boolean> {
  * @returns Tailwind color class
  */
 export function getVoteCardColor(value: string): string {
-  const numValue = parseInt(value, 10)
-  
   if (value === '?') return 'bg-gray-500'
   if (value === '☕') return 'bg-amber-600'
+  
+  const numValue = parseVoteValue(value)
+  
   if (numValue === 0) return 'bg-green-500'
-  if (numValue <= 3) return 'bg-blue-500'
+  if (numValue <= 2) return 'bg-blue-500'
+  if (numValue <= 5) return 'bg-cyan-500'
   if (numValue <= 8) return 'bg-yellow-500'
-  if (numValue <= 21) return 'bg-orange-500'
+  if (numValue <= 20) return 'bg-orange-500'
   return 'bg-red-500'
 }

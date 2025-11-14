@@ -18,18 +18,21 @@ export type UpdateParticipant = Database['public']['Tables']['participants']['Up
 export type UpdateTopic = Database['public']['Tables']['topics']['Update']
 export type UpdateVote = Database['public']['Tables']['votes']['Update']
 
-// Vote card values
+// Vote card values - Story Points with Estimate Time
 export const VOTE_VALUES = [
-  '0',
-  '1',
-  '2',
-  '3',
-  '5',
-  '8',
-  '13',
-  '21',
-  '?',
-  '☕',
+  '0',      // 0 hours
+  '1/2',    // 0.5 hours
+  '1',      // 1 hour
+  '2',      // 2 hours
+  '3',      // 3.5 hours
+  '5',      // 5 hours
+  '8',      // 7 hours
+  '13',     // 14 hours (2 days)
+  '20',     // 21 hours (3 days)
+  '40',     // 35 hours (1 week)
+  '100',    // 70 hours (2 weeks)
+  '?',      // Unknown
+  '☕',     // Break
 ] as const
 
 export type VoteValue = (typeof VOTE_VALUES)[number]

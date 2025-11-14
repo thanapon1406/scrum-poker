@@ -98,7 +98,21 @@ Stores individual votes.
 - `id` (UUID, Primary Key)
 - `topic_id` (UUID, Foreign Key → topics)
 - `participant_id` (UUID, Foreign Key → participants)
-- `vote_value` (TEXT) - "0", "1", "2", "3", "5", "8", "13", "21", "?", "☕"
+- `vote_value` (TEXT) - "0", "1/2", "1", "2", "3", "5", "8", "13", "20", "40", "100", "?", "☕"
+  - Story Points with estimate time:
+    - 0 = 0 hours
+    - 1/2 = 0.5 hours
+    - 1 = 1 hour
+    - 2 = 2 hours
+    - 3 = 3.5 hours
+    - 5 = 5 hours
+    - 8 = 7 hours
+    - 13 = 14 hours (2 days)
+    - 20 = 21 hours (3 days)
+    - 40 = 35 hours (1 week)
+    - 100 = 70 hours (2 weeks)
+    - ? = Unknown
+    - ☕ = Break
 - `created_at`, `updated_at` (Timestamps)
 
 ## 🔒 Security (Row Level Security)
@@ -107,7 +121,7 @@ All tables have RLS enabled with public read/write access. This is intentional f
 
 ## 🛠️ Helper Functions
 
-- `calculate_topic_average(topic_uuid)` - Calculates average of numeric votes
+- `calculate_topic_average(topic_uuid)` - Returns the most frequently selected card (mode) instead of average. If there's a tie, returns the lower value.
 - `cleanup_old_rooms()` - Marks rooms older than 7 days as inactive (for maintenance)
 
 ## 📝 Notes

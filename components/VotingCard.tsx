@@ -19,6 +19,26 @@ export default function VotingCard({
 }: VotingCardProps) {
   const colorClass = getVoteCardColor(value)
 
+  // Map vote values to estimate time
+  const getEstimateTime = (val: string) => {
+    const timeMap: Record<string, string> = {
+      '0': '0h',
+      '1/2': '0.5h',
+      '1': '1h',
+      '2': '2h',
+      '3': '3.5h',
+      '5': '5h',
+      '8': '7h',
+      '13': '14h',
+      '20': '21h',
+      '40': '35h',
+      '100': '70h',
+      '?': '?',
+      '☕': '☕',
+    }
+    return timeMap[val] || val
+  }
+
   return (
     <button
       onClick={onClick}
@@ -27,12 +47,21 @@ export default function VotingCard({
         'relative w-full aspect-[2/3] rounded-xl font-bold text-2xl transition-all duration-200',
         'hover:scale-105 active:scale-95',
         'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100',
+        'flex flex-col items-center justify-center gap-1',
         isSelected
           ? `${colorClass} text-white shadow-lg scale-105 ring-4 ring-primary-400`
           : 'bg-white text-slate-700 border-2 border-slate-300 hover:border-primary-400 shadow-sm'
       )}
     >
-      {value}
+      <span className="text-3xl">{value}</span>
+      {value !== '?' && value !== '☕' && (
+        <span className={clsx(
+          'text-xs font-normal',
+          isSelected ? 'text-white/80' : 'text-slate-500'
+        )}>
+          {getEstimateTime(value)}
+        </span>
+      )}
       {isSelected && (
         <div className="absolute -top-2 -right-2 w-6 h-6 bg-primary-500 rounded-full flex items-center justify-center">
           <svg
