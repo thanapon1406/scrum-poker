@@ -55,6 +55,15 @@ export default function RoomPage() {
       }
 
       setRoom(data)
+      
+      // Load participants immediately after room is loaded
+      const { data: participantsData } = await supabase
+        .from('participants')
+        .select('*')
+        .eq('room_id', data.id)
+        .order('joined_at', { ascending: true })
+
+      if (participantsData) setParticipants(participantsData)
     } catch (err) {
       console.error('Error loading room:', err)
       setError('Failed to load room')
@@ -116,8 +125,10 @@ export default function RoomPage() {
       if (data && !error) {
         setCurrentUser(data)
         setHasJoined(true)
-        loadParticipants()
-        loadTopics()
+        // Load topics after participant is restored
+        if (room) {
+          loadTopics()
+        }
       } else {
         // Participant not found, clear localStorage
         localStorage.removeItem(`participant_${inviteCode}`)
@@ -130,15 +141,27 @@ export default function RoomPage() {
 
   // Initialize room and restore participant from localStorage
   useEffect(() => {
-    loadRoom()
-    
-    // Try to restore participant from localStorage
-    const savedParticipantId = localStorage.getItem(`participant_${inviteCode}`)
-    if (savedParticipantId) {
-      restoreParticipant(savedParticipantId)
+    const initializeRoom = async () => {
+      await loadRoom()
+      
+      // Try to restore participant from localStorage after room loads
+      const savedParticipantId = localStorage.getItem(`participant_${inviteCode}`)
+      if (savedParticipantId) {
+        await restoreParticipant(savedParticipantId)
+      }
     }
+    
+    initializeRoom()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inviteCode])
+
+  // Load topics when room changes
+  useEffect(() => {
+    if (room && hasJoined) {
+      loadTopics()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [room, hasJoined])
 
   // Set up real-time subscriptions
   useEffect(() => {
