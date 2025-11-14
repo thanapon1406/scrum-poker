@@ -94,8 +94,10 @@ export default function RoomPage() {
       .order('created_at', { ascending: false })
 
     if (data) {
+      console.log('Loaded topics:', data)
       setTopics(data)
       const active = data.find((t: any) => t.is_active)
+      console.log('Active topic:', active)
       setActiveTopic(active || null)
       if (active) loadVotes(active.id)
     }
@@ -167,6 +169,8 @@ export default function RoomPage() {
   useEffect(() => {
     if (!room || !hasJoined) return
 
+    console.log('Setting up real-time subscriptions for room:', room.id)
+
     const channel = supabase.channel(`room:${room.id}`)
       .on(
         'postgres_changes',
@@ -176,7 +180,10 @@ export default function RoomPage() {
           table: 'participants',
           filter: `room_id=eq.${room.id}`,
         },
-        () => loadParticipants()
+        (payload) => {
+          console.log('Participants changed:', payload)
+          loadParticipants()
+        }
       )
       .on(
         'postgres_changes',
@@ -186,7 +193,14 @@ export default function RoomPage() {
           table: 'topics',
           filter: `room_id=eq.${room.id}`,
         },
-        () => loadTopics()
+        (payload) => {
+          console.log('Topics changed:', payload)
+          loadTopics()
+          // Clear selected vote when topic changes
+          if (payload.eventType === 'UPDATE') {
+            setSelectedVote(null)
+          }
+        }
       )
       .on(
         'postgres_changes',
@@ -195,13 +209,17 @@ export default function RoomPage() {
           schema: 'public',
           table: 'votes',
         },
-        () => {
+        (payload) => {
+          console.log('Votes changed:', payload)
           if (activeTopic) loadVotes(activeTopic.id)
         }
       )
-      .subscribe()
+      .subscribe((status) => {
+        console.log('Subscription status:', status)
+      })
 
     return () => {
+      console.log('Removing real-time subscriptions')
       supabase.removeChannel(channel)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -345,19 +363,32 @@ export default function RoomPage() {
   const handleTopicSelected = async (topicId: string) => {
     if (!currentUser?.is_host || !room) return
 
+    console.log('Host selecting topic:', topicId)
+
     try {
       // Deactivate all topics
-      await supabase
+      const { error: deactivateError } = await supabase
         .from('topics')
         .update({ is_active: false })
         .eq('room_id', room.id)
 
+      if (deactivateError) {
+        console.error('Error deactivating topics:', deactivateError)
+        throw deactivateError
+      }
+
       // Activate selected topic
-      await supabase
+      const { error: activateError } = await supabase
         .from('topics')
         .update({ is_active: true })
         .eq('id', topicId)
 
+      if (activateError) {
+        console.error('Error activating topic:', activateError)
+        throw activateError
+      }
+
+      console.log('Topic selection completed successfully')
       setSelectedVote(null)
       loadTopics()
     } catch (error) {

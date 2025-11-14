@@ -17,6 +17,7 @@
 4. Paste it into the SQL editor
 5. Click **Run** (or press Ctrl/Cmd + Enter)
 6. You should see "Success. No rows returned" message
+7. **Repeat steps 2-6** for `supabase/migrations/002_enable_realtime.sql` to enable real-time updates
 
 #### Option B: Using Supabase CLI (Advanced)
 ```bash
@@ -33,7 +34,18 @@ supabase link --project-ref your-project-ref
 supabase db push
 ```
 
-### 3. Get Your API Keys
+### 3. Enable Realtime (Important!)
+After running the migrations, verify that Realtime is enabled:
+1. Go to **Database** → **Publications** in your Supabase dashboard
+2. Make sure the `supabase_realtime` publication includes these tables:
+   - ✅ `rooms`
+   - ✅ `participants`
+   - ✅ `topics`
+   - ✅ `votes`
+
+If any table is missing, the `002_enable_realtime.sql` migration should have added them automatically.
+
+### 4. Get Your API Keys
 1. Go to **Project Settings** → **API**
 2. Copy your:
    - **Project URL** (looks like: `https://xxxxx.supabase.co`)
@@ -44,7 +56,7 @@ supabase db push
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
    ```
 
-### 4. Verify Installation
+### 5. Verify Installation
 After running the migration, you should see these tables in **Table Editor**:
 - ✅ `rooms`
 - ✅ `participants`
