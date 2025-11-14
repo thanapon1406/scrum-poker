@@ -18,8 +18,9 @@ A fast, simple, and free Planning Poker application for agile teams. Estimate yo
 - **📜 Voting History** - Track all estimated topics and their final scores
 - **👥 Participant Status** - See who has voted in real-time
 - **✏️ Edit Your Name** - Each participant can change their own display name
-- **� Host Notes** - After revealing votes, host can add notes/explanations for the result
-- **�🗑️ Topic Management** - Host can delete topics they no longer need
+- **📝 Host Notes** - After revealing votes, host can add notes/explanations for the result
+- **️ Topic Management** - Host can delete topics they no longer need
+- **📊 Session Summary** - Host can view, print, or copy a comprehensive summary of all completed topics
 - **🎨 Clean, Minimal UI** - Inspired by planningpokeronline.com
 - **📱 Responsive Design** - Works on desktop, tablet, and mobile
 

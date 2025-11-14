@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.1.0] - 2025-11-14
 
 ### Added
+- **Session Summary**: Host can now view a comprehensive summary of all completed topics
+  - View all completed topics with title, description, result, and individual votes
+  - Print functionality for documentation
+  - Copy to clipboard as formatted text
+  - Modal dialog with clean, organized layout
+  - Accessible via "View Session Summary" button after completing topics
 - **Edit Participant Names**: Each participant can now edit their own display name
   - Inline editing with save/cancel buttons
   - Real-time updates across all participants

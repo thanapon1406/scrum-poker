@@ -5,17 +5,17 @@
 A **production-ready**, **fully-functional** Planning Poker application with:
 
 ### 🏗️ Complete Application
-- ✅ **23 files** created
+- ✅ **24 files** created
 - ✅ **4 pages/routes** implemented
-- ✅ **6 reusable components** built
+- ✅ **7 reusable components** built
 - ✅ **4 database tables** with full schema
 - ✅ **Real-time synchronization** with WebSockets
 - ✅ **TypeScript** throughout for type safety
 - ✅ **Responsive design** for all devices
 
-### 📁 Project Files (23 Total)
+### 📁 Project Files (24 Total)
 
-#### Core Application (11 files)
+#### Core Application (12 files)
 ```
 ✅ app/layout.tsx              - Root layout
 ✅ app/page.tsx                - Home page
@@ -27,6 +27,7 @@ A **production-ready**, **fully-functional** Planning Poker application with:
 ✅ components/ResultsPanel.tsx - Results display
 ✅ components/HostControls.tsx - Host controls
 ✅ components/RoomHeader.tsx   - Room header
+✅ components/SessionSummary.tsx - Session summary
 ✅ lib/supabase.ts             - Supabase client
 ```
 
@@ -98,6 +99,9 @@ A **production-ready**, **fully-functional** Planning Poker application with:
 - [x] Host can add notes after revealing votes
 - [x] Host controls (reveal/reset)
 - [x] Topic history with scores and notes
+- [x] Session summary (view all completed topics)
+- [x] Print session summary
+- [x] Copy session summary to clipboard
 
 ### ⚡ Real-time Features
 - [x] Supabase Realtime WebSocket

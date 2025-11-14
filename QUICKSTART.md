@@ -67,6 +67,9 @@ Open [http://localhost:3000](http://localhost:3000) 🎉
 7. **Try new features:**
    - Click the edit icon (✏️) next to your name to change it
    - As host, hover over topics to see the delete button (🗑️)
+   - After revealing votes, add notes/explanations as host
+   - After completing topics, click "View Session Summary" to see all results
+   - Print or copy the session summary for documentation
 
 ## 🎯 Next Steps
 

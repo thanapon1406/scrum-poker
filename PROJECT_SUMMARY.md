@@ -21,7 +21,8 @@ planningpokeronlineforfree/
 │   ├── TopicManager.tsx             # Create/select topics
 │   ├── ResultsPanel.tsx             # Display revealed votes
 │   ├── HostControls.tsx             # Reveal/Reset buttons
-│   └── RoomHeader.tsx               # Room info & invite code
+│   ├── RoomHeader.tsx               # Room info & invite code
+│   └── SessionSummary.tsx           # Session summary modal
 │
 ├── 📁 lib/                          # Utilities
 │   ├── supabase.ts                  # Supabase client
@@ -85,6 +86,9 @@ planningpokeronlineforfree/
 - [x] View all topics in a room
 - [x] See completed topics with scores and notes
 - [x] Topic history per room
+- [x] Session summary with all completed topics
+- [x] Print session summary
+- [x] Copy session summary to clipboard
 
 ### ✅ Participant Features
 - [x] Edit your own display name

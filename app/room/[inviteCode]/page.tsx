@@ -19,6 +19,7 @@ import TopicManager from '@/components/TopicManager'
 import VotingCard from '@/components/VotingCard'
 import ResultsPanel from '@/components/ResultsPanel'
 import HostControls from '@/components/HostControls'
+import SessionSummary from '@/components/SessionSummary'
 
 export default function RoomPage() {
   const params = useParams()
@@ -39,6 +40,7 @@ export default function RoomPage() {
   const [hasJoined, setHasJoined] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [showSummary, setShowSummary] = useState(false)
 
   // Load room data
   const loadRoom = async () => {
@@ -608,9 +610,28 @@ export default function RoomPage() {
                 onReset={handleResetVotes}
               />
             )}
+
+            {/* Session Summary Button */}
+            {currentUser?.is_host && topics.some(t => t.is_revealed) && (
+              <div className="mt-4">
+                <button
+                  onClick={() => setShowSummary(true)}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg shadow-lg transition-all duration-200 hover:shadow-xl"
+                >
+                  📊 View Session Summary
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
+
+      {/* Session Summary Modal */}
+      <SessionSummary
+        isOpen={showSummary}
+        onClose={() => setShowSummary(false)}
+        roomId={room!.id}
+      />
     </div>
   )
 }

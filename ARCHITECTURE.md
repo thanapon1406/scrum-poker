@@ -350,11 +350,17 @@ RoomPage (app/room/[inviteCode]/page.tsx)
   │   ├── Final result display (mode calculation)
   │   ├── Tie handling ("X or Y" format)
   │   ├── Vote distribution chart
-  │   └── Individual votes list
+  │   ├── Individual votes list
+  │   └── Host notes/description editor
   │
-  └── HostControls (host only)
-      ├── Reveal button
-      └── Reset button
+  ├── HostControls (host only)
+  │   ├── Reveal button
+  │   └── Reset button
+  │
+  └── SessionSummary (host only)
+      ├── Modal with all completed topics
+      ├── Print functionality
+      └── Copy to clipboard
 ```
 
 ### State Management
