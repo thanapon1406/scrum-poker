@@ -208,7 +208,15 @@ export default function RoomPage() {
       }
 
       // Check if this is the first participant (will be host)
-      const isHost = participants.length === 0
+      // Query database directly to ensure accurate count
+      const { data: existingParticipants, error: countError } = await supabase
+        .from('participants')
+        .select('id')
+        .eq('room_id', room.id)
+
+      if (countError) throw countError
+
+      const isHost = !existingParticipants || existingParticipants.length === 0
 
       const { data: newParticipant, error } = await supabase
         .from('participants')
