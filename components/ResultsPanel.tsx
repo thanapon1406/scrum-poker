@@ -123,7 +123,7 @@ export default function ResultsPanel({
                 {vote.participant.display_name}
               </span>
               <span className={clsx(
-                'text-white text-sm font-bold px-3 py-1 rounded',
+                'text-slate-700 text-sm font-bold px-3 py-1 rounded',
                 getVoteCardColor(vote.vote_value)
               )}>
                 {vote.vote_value}
