@@ -183,3 +183,13 @@ export function getVoteCardColor(value: string): string {
   if (numValue <= 21) return 'bg-orange-500'
   return 'bg-red-500'
 }
+
+/**
+ * Get progress bar color (using custom blue #0284c7)
+ * @param value - Vote value
+ * @returns Custom style for progress bars
+ */
+export function getProgressBarColor(value: string): string {
+  // Use primary-600 which is #0284c7 (defined in tailwind.config.js)
+  return 'bg-primary-600'
+}

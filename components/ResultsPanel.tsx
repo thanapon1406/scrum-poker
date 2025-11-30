@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { VoteWithParticipant, Topic } from '@/types'
-import { getVoteCardColor, formatAverageResult } from '@/lib/utils'
+import { getVoteCardColor, getProgressBarColor, formatAverageResult } from '@/lib/utils'
 import clsx from 'clsx'
 
 interface ResultsPanelProps {
@@ -104,6 +104,9 @@ export default function ResultsPanel({
       return a.localeCompare(b)
     }
   )
+
+  // Find the highest vote count for bold styling
+  const maxVoteCount = Math.max(...Object.values(voteDistribution))
 
   return (
     <div className="card">
@@ -221,26 +224,50 @@ export default function ResultsPanel({
       )}
 
       {/* Vote Distribution */}
-      <div className="space-y-3">
+      <div className="space-y-4">
         {sortedVotes.map(([value, count]) => {
-          const percentage = (count / votes.length) * 100
-          const colorClass = getVoteCardColor(value)
+          const percentage = Math.round((count / votes.length) * 100)
+          const progressBarColorClass = getProgressBarColor(value)
+          const cardColorClass = getVoteCardColor(value)
+          const isHighestVoted = count === maxVoteCount
 
           return (
-            <div key={value}>
-              <div className="flex items-center justify-between mb-1">
-                <span className="font-semibold text-slate-700 text-lg">
+            <div key={value} className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className={clsx(
+                  'text-lg',
+                  isHighestVoted 
+                    ? 'font-bold text-slate-900' 
+                    : 'font-semibold text-slate-700'
+                )}>
                   {value}
                 </span>
-                <span className="text-sm text-slate-500">
-                  {count} {count === 1 ? 'vote' : 'votes'}
+                <span className={clsx(
+                  'text-sm',
+                  isHighestVoted
+                    ? 'font-bold text-slate-800'
+                    : 'text-slate-500'
+                )}>
+                  {count} {count === 1 ? 'vote' : 'votes'} ({percentage}%)
                 </span>
               </div>
-              <div className="w-full bg-slate-200 rounded-full h-3 overflow-hidden">
+              <div className="w-full bg-slate-200 rounded-full h-4 overflow-hidden border border-slate-300">
                 <div
-                  className={clsx(colorClass, 'h-full transition-all duration-500')}
-                  style={{ width: `${percentage}%` }}
-                />
+                  className={clsx(
+                    'h-full transition-all duration-700 flex items-center justify-end pr-2',
+                    isHighestVoted && 'shadow-lg ring-2 ring-inset'
+                  )}
+                  style={{ 
+                    width: `${Math.max(percentage, 8)}%`,
+                    backgroundColor: '#0284c7'
+                  }}
+                >
+                  {percentage > 15 && (
+                    <span className="text-xs font-bold text-white drop-shadow">
+                      {percentage}%
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           )
