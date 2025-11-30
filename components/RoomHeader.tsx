@@ -7,6 +7,8 @@ interface RoomHeaderProps {
   inviteCode: string
   roomId: string
   isHost: boolean
+  isObserver?: boolean
+  displayName?: string
   onLeave: () => void
 }
 
@@ -14,6 +16,8 @@ export default function RoomHeader({
   inviteCode,
   roomId,
   isHost,
+  isObserver = false,
+  displayName = '',
   onLeave,
 }: RoomHeaderProps) {
   const [copied, setCopied] = useState(false)
@@ -33,10 +37,22 @@ export default function RoomHeader({
       <div className="flex items-center justify-between flex-wrap gap-4">
         {/* Room Info */}
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 mb-1">
-            Planning Poker
-          </h1>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3 mb-1">
+            <h1 className="text-2xl font-bold text-slate-900">
+              Planning Poker
+            </h1>
+            {isObserver && (
+              <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                👁️ Observer Mode
+              </span>
+            )}
+            {isHost && !isObserver && (
+              <span className="bg-amber-100 text-amber-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+                👑 Host
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-2 flex-wrap">
             <span className="text-sm text-slate-600">Room Code:</span>
             <code className="text-lg font-mono font-bold text-primary-600 bg-primary-50 px-3 py-1 rounded">
               {inviteCode}
@@ -48,12 +64,12 @@ export default function RoomHeader({
             >
               {copied ? '✓ Copied!' : '📋 Copy'}
             </button>
+            {displayName && (
+              <span className="text-sm text-slate-600 ml-2">
+                • {displayName}
+              </span>
+            )}
           </div>
-          {isHost && (
-            <span className="inline-block mt-2 text-xs bg-amber-100 text-amber-800 px-2 py-1 rounded">
-              👑 You are the host
-            </span>
-          )}
         </div>
 
         {/* Leave Button */}

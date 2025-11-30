@@ -38,6 +38,7 @@ export default function RoomPage() {
   const [displayName, setDisplayName] = useState('')
   const [isJoining, setIsJoining] = useState(false)
   const [hasJoined, setHasJoined] = useState(false)
+  const [isObserver, setIsObserver] = useState(false)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [showSummary, setShowSummary] = useState(false)
@@ -172,6 +173,12 @@ export default function RoomPage() {
     if (!room || !hasJoined) return
 
     console.log('Setting up real-time subscriptions for room:', room.id)
+    
+    // Load initial data for observers too
+    if (isObserver) {
+      loadParticipants()
+      loadTopics()
+    }
 
     const channel = supabase.channel(`room:${room.id}`)
       .on(
@@ -288,9 +295,40 @@ export default function RoomPage() {
     }
   }
 
+  // Join as Observer (no database save)
+  const handleJoinAsObserver = async () => {
+    if (!displayName.trim() || !room) return
+
+    setIsJoining(true)
+    setError('')
+
+    try {
+      // Create a fake participant object for observer (not saved to DB)
+      const observerParticipant = {
+        id: 'observer-' + Date.now(),
+        room_id: room.id,
+        display_name: displayName.trim() + ' (Observer)',
+        is_host: false,
+        joined_at: new Date().toISOString(),
+        last_seen_at: new Date().toISOString()
+      }
+
+      setCurrentUser(observerParticipant as Participant)
+      setHasJoined(true)
+      setIsObserver(true)
+      loadParticipants()
+      loadTopics()
+    } catch (err: any) {
+      console.error('Error joining as observer:', err)
+      setError('Failed to join as observer. Please try again.')
+    } finally {
+      setIsJoining(false)
+    }
+  }
+
   // Vote
   const handleVote = async (value: VoteValue) => {
-    if (!currentUser || !activeTopic || activeTopic.is_revealed) return
+    if (!currentUser || !activeTopic || activeTopic.is_revealed || isObserver) return
 
     try {
       // Check if user already voted
@@ -468,14 +506,31 @@ export default function RoomPage() {
               </div>
             )}
 
-            <button
-              type="submit"
-              disabled={isJoining || !displayName.trim()}
-              className="btn-primary w-full py-3"
-            >
-              {isJoining ? 'Joining...' : 'Join Room'}
-            </button>
+            <div className="space-y-3">
+              <button
+                type="submit"
+                disabled={isJoining || !displayName.trim()}
+                className="btn-primary w-full py-3"
+              >
+                {isJoining ? 'Joining...' : '👤 Join as Participant'}
+              </button>
+              
+              <button
+                type="button"
+                onClick={handleJoinAsObserver}
+                disabled={isJoining || !displayName.trim()}
+                className="w-full py-3 px-4 border-2 border-slate-300 text-slate-700 font-medium rounded-lg hover:bg-slate-50 hover:border-slate-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isJoining ? 'Joining...' : '👁️ Join as Observer (View Only)'}
+              </button>
+            </div>
           </form>
+
+          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-xs text-blue-800">
+              <strong>Observer mode:</strong> You can see everything but cannot vote or take actions. Perfect for stakeholders or managers who want to watch the session.
+            </p>
+          </div>
 
           <div className="mt-6 pt-6 border-t border-slate-200 text-center">
             <p className="text-sm text-slate-500 mb-3">
@@ -511,7 +566,9 @@ export default function RoomPage() {
           inviteCode={inviteCode}
           roomId={room!.id}
           isHost={currentUser?.is_host || false}
-          onLeave={handleLeaveRoom}
+          isObserver={isObserver}
+          displayName={currentUser?.display_name || ''}
+          onLeave={() => router.push('/')}
         />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -552,19 +609,29 @@ export default function RoomPage() {
                 {!activeTopic.is_revealed && (
                   <div>
                     <h3 className="text-lg font-semibold text-slate-700 mb-4">
-                      Cast Your Vote
+                      {isObserver ? 'Waiting for Votes (Observer Mode)' : 'Cast Your Vote'}
                     </h3>
-                    <div className="grid grid-cols-5 md:grid-cols-10 gap-3">
-                      {VOTE_VALUES.map((value) => (
-                        <VotingCard
-                          key={value}
-                          value={value}
-                          isSelected={currentVoteValue === value}
-                          isDisabled={activeTopic.is_revealed}
-                          onClick={() => handleVote(value)}
-                        />
-                      ))}
-                    </div>
+                    {isObserver ? (
+                      <div className="text-center py-8 bg-blue-50 border border-blue-200 rounded-lg">
+                        <div className="text-4xl mb-3">👁️</div>
+                        <p className="text-blue-800 font-medium">Observer Mode</p>
+                        <p className="text-sm text-blue-600 mt-1">
+                          You can watch the voting but cannot participate
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-5 md:grid-cols-10 gap-3">
+                        {VOTE_VALUES.map((value) => (
+                          <VotingCard
+                            key={value}
+                            value={value}
+                            isSelected={currentVoteValue === value}
+                            isDisabled={activeTopic.is_revealed}
+                            onClick={() => handleVote(value)}
+                          />
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
 
