@@ -29,6 +29,7 @@ export const VOTE_VALUES = [
   '7',      // 7 hours
   '10.5',   // 10.5 hours
   '14',     // 14 hours (2 days)
+  '17.5',   // 17.5 hours
   '21',     // 21 hours (3 days)
   '40',     // 40 hours (1 week)
   '?',      // Unknown

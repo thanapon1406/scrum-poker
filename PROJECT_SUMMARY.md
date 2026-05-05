@@ -68,7 +68,7 @@ planningpokeronlineforfree/
 - [x] Room header with shareable invite code
 
 ### ✅ Voting System
-- [x] Custom deck: 0, 1/2, 1, 2, 3.5, 5, 7, 10.5, 14, 21, 40, ?, ☕
+- [x] Custom deck: 0, 1/2, 1, 2, 3.5, 5, 7, 10.5, 14, 17.5, 21, 40, ?, ☕
 - [x] Time estimates for each card (hours)
 - [x] Real-time vote submission
 - [x] Vote status visibility (who voted, not what)

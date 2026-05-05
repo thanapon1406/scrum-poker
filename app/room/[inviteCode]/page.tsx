@@ -596,14 +596,6 @@ export default function RoomPage() {
             {/* Current Topic */}
             {activeTopic ? (
               <div className="card">
-                <div className="mb-6">
-                  <h2 className="text-2xl font-bold text-slate-900 mb-2">
-                    {activeTopic.title}
-                  </h2>
-                  {activeTopic.description && (
-                    <p className="text-slate-600">{activeTopic.description}</p>
-                  )}
-                </div>
 
                 {/* Voting Cards */}
                 {!activeTopic.is_revealed && (

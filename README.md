@@ -12,7 +12,7 @@ A fast, simple, and free Planning Poker application for agile teams. Estimate yo
 - **🚀 Instant Room Creation** - Create a room with one click, no sign-up required
 - **🔗 Simple Invite Codes** - Share a short code to invite team members
 - **⚡ Real-time Synchronization** - All votes sync instantly using Supabase Realtime
-- **🎯 Story Point Cards** - Estimation cards: 0, 1/2, 1, 2, 3.5, 5, 7, 10.5, 14, 21, 40, ?, ☕
+- **🎯 Story Point Cards** - Estimation cards: 0, 1/2, 1, 2, 3.5, 5, 7, 10.5, 14, 17.5, 21, 40, ?, ☕
 - **📊 Most Selected Card** - Shows the most frequently voted card (excludes ? and ☕)
 - **⏱️ Time Estimates** - Each card shows estimated hours for planning
 - **📜 Voting History** - Track all estimated topics and their final scores
@@ -278,7 +278,7 @@ Edit `types/index.ts`:
 
 ```typescript
 export const VOTE_VALUES = [
-  '0', '1', '2', '3', '5', '8', '13', '21', '?', '☕'
+  '0', '1/2', '1', '2', '3.5', '5', '7', '10.5', '14', '17.5', '21', '40', '?', '☕'
 ] as const
 ```
 

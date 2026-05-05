@@ -32,7 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - **Vote Calculation**: Changed from average to mode (most selected card)
-- **Vote Values**: Updated deck to custom scale: 0, 1/2, 1, 2, 3.5, 5, 7, 10.5, 14, 21, 40, ?, ☕
+- **Vote Values**: Updated deck to custom scale: 0, 1/2, 1, 2, 3.5, 5, 7, 10.5, 14, 17.5, 21, 40, ?, ☕
 - **Time Estimates**: Each card now shows estimated hours
 - **Tie Handling**: When votes tie, displays "X or Y" format (e.g., "7 or 10.5")
 - **Card Selection UI**: Changed to white cards with blue border when selected
