@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
+import * as htmlToImage from 'html-to-image'
 import { supabase } from '@/lib/supabase'
 import { VoteWithParticipant, Topic } from '@/types'
 import { getVoteCardColor, getProgressBarColor, formatAverageResult } from '@/lib/utils'
@@ -26,6 +27,37 @@ export default function ResultsPanel({
   const [isEditingDescription, setIsEditingDescription] = useState(false)
   const [description, setDescription] = useState(topic.description || '')
   const [isSaving, setIsSaving] = useState(false)
+  
+  const panelRef = useRef<HTMLDivElement>(null)
+  const [isCopying, setIsCopying] = useState(false)
+  const [copySuccess, setCopySuccess] = useState(false)
+
+  const handleCopyImage = async () => {
+    if (!panelRef.current) return
+    setIsCopying(true)
+    setCopySuccess(false)
+    try {
+      const blob = await htmlToImage.toBlob(panelRef.current, {
+        backgroundColor: '#ffffff',
+        filter: (node: HTMLElement) => {
+          // exclude the copy button itself
+          return !node.classList?.contains('exclude-from-capture')
+        }
+      })
+      if (!blob) throw new Error('Failed to capture image')
+      
+      const item = new ClipboardItem({ 'image/png': blob })
+      await navigator.clipboard.write([item])
+      
+      setCopySuccess(true)
+      setTimeout(() => setCopySuccess(false), 2000)
+    } catch (err) {
+      console.error('Error copying image:', err)
+      alert('Failed to copy image. Your browser might not support Clipboard API.')
+    } finally {
+      setIsCopying(false)
+    }
+  }
 
   const handleSaveDescription = async () => {
     if (!isHost) return
@@ -109,10 +141,45 @@ export default function ResultsPanel({
   const maxVoteCount = Math.max(...Object.values(voteDistribution))
 
   return (
-    <div className="card">
-      <h2 className="text-2xl font-bold text-slate-900 mb-6 text-center">
-        Results
-      </h2>
+    <div className="card relative" ref={panelRef}>
+      <div className="relative mb-6 text-center px-4">
+        <h2 className="text-4xl font-bold text-slate-900 mb-4">
+          {topic.title}
+        </h2>
+        <p className="text-sm font-medium text-slate-500 uppercase tracking-widest">
+          Results
+        </p>
+        <button
+          onClick={handleCopyImage}
+          disabled={isCopying}
+          className="exclude-from-capture absolute right-0 top-0 text-slate-500 hover:text-primary-600 bg-white rounded-md p-1.5 border border-slate-200 text-xs flex items-center gap-1 hover:bg-slate-50 transition-colors shadow-sm"
+          title="Copy as image"
+        >
+          {copySuccess ? (
+            <>
+              <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              Copied!
+            </>
+          ) : isCopying ? (
+            <>
+              <svg className="w-4 h-4 animate-spin text-primary-500" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+              </svg>
+              Copying...
+            </>
+          ) : (
+            <>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+              Copy Image
+            </>
+          )}
+        </button>
+      </div>
 
       {/* Final Result (Mode) */}
       {resultText && (
