@@ -133,12 +133,12 @@ export default function TopicManager({
                 className="flex items-start justify-between gap-2 cursor-pointer"
                 onClick={() => isHost && onTopicSelected(topic.id)}
               >
-                <div className="flex-1">
-                  <h3 className="font-medium text-slate-900 mb-1">
+              <div className="flex-1 min-w-0">
+                <h3 className="font-medium text-slate-900 mb-1 break-words">
                     {topic.title}
                   </h3>
                   {topic.description && (
-                    <p className="text-xs text-slate-500 line-clamp-2">
+                  <p className="text-xs text-slate-500 line-clamp-2 break-words">
                       {topic.description}
                     </p>
                   )}
