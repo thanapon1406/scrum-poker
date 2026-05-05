@@ -93,7 +93,7 @@ A **production-ready**, **fully-functional** Planning Poker application with:
 - [x] Topic/story management (host only)
 - [x] Delete topics (host only)
 - [x] Edit participant names (own name only)
-- [x] Voting cards (0, 1/2, 1, 2, 3.5, 5, 7, 10.5, 14, 21, 40, ?, ☕)
+- [x] Voting cards (0, 1/2, 1, 2, 3.5, 5, 7, 10.5, 14, 17.5, 21, 40, ?, ☕)
 - [x] Results panel with mode calculation
 - [x] Tie detection (shows "X or Y" format)
 - [x] Host can add notes after revealing votes
