@@ -142,17 +142,11 @@ export default function ResultsPanel({
 
   return (
     <div className="card relative" ref={panelRef}>
-      <div className="relative mb-6 text-center px-4">
-        <h2 className="text-4xl font-bold text-slate-900 mb-4">
-          {topic.title}
-        </h2>
-        <p className="text-sm font-medium text-slate-500 uppercase tracking-widest">
-          Results
-        </p>
+      <div className="flex justify-end mb-2">
         <button
           onClick={handleCopyImage}
           disabled={isCopying}
-          className="exclude-from-capture absolute right-0 top-0 text-slate-500 hover:text-primary-600 bg-white rounded-md p-1.5 border border-slate-200 text-xs flex items-center gap-1 hover:bg-slate-50 transition-colors shadow-sm"
+          className="exclude-from-capture text-slate-500 hover:text-primary-600 bg-white rounded-md p-1.5 border border-slate-200 text-xs flex items-center gap-1 hover:bg-slate-50 transition-colors shadow-sm"
           title="Copy as image"
         >
           {copySuccess ? (
@@ -179,6 +173,15 @@ export default function ResultsPanel({
             </>
           )}
         </button>
+      </div>
+
+      <div className="mb-6 text-center px-4">
+        <h2 className="text-2xl font-bold text-slate-900 mb-4 break-all">
+          {topic.title}
+        </h2>
+        <p className="text-sm font-medium text-slate-500 uppercase tracking-widest">
+          Results
+        </p>
       </div>
 
       {/* Final Result (Mode) */}
@@ -231,11 +234,11 @@ export default function ResultsPanel({
               {topic.description ? (
                 <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
                   <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-amber-900 mb-1">
                         📝 Host Notes
                       </p>
-                      <p className="text-sm text-amber-800 whitespace-pre-wrap">
+                      <p className="text-sm text-amber-800 whitespace-pre-wrap break-words">
                         {topic.description}
                       </p>
                     </div>
@@ -284,7 +287,7 @@ export default function ResultsPanel({
           <p className="text-sm font-medium text-amber-900 mb-1">
             📝 Host Notes
           </p>
-          <p className="text-sm text-amber-800 whitespace-pre-wrap">
+          <p className="text-sm text-amber-800 whitespace-pre-wrap break-words">
             {topic.description}
           </p>
         </div>
