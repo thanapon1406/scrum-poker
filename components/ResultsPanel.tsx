@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react'
 import * as htmlToImage from 'html-to-image'
-import { supabase } from '@/lib/supabase'
+import { updateTopic } from '@/services/topics.service'
 import { VoteWithParticipant, Topic } from '@/types'
 import { getVoteCardColor, getProgressBarColor, formatAverageResult } from '@/lib/utils'
 import clsx from 'clsx'
@@ -64,10 +64,7 @@ export default function ResultsPanel({
 
     setIsSaving(true)
     try {
-      const { error } = await supabase
-        .from('topics')
-        .update({ description: description.trim() || null })
-        .eq('id', topic.id)
+      const { error } = await updateTopic(topic.id, { description: description.trim() || null })
 
       if (error) throw error
 

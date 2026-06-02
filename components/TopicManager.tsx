@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { supabase } from '@/lib/supabase'
+import { createTopic, deleteTopic } from '@/services/topics.service'
 import { Topic } from '@/types'
 
 interface TopicManagerProps {
@@ -31,7 +31,7 @@ export default function TopicManager({
 
     setIsCreating(true)
     try {
-      const { error } = await supabase.from('topics').insert({
+      const { error } = await createTopic({
         room_id: roomId,
         title: newTopicTitle.trim(),
         description: newTopicDescription.trim() || null,
@@ -60,10 +60,7 @@ export default function TopicManager({
     }
 
     try {
-      const { error } = await supabase
-        .from('topics')
-        .delete()
-        .eq('id', topicId)
+      const { error } = await deleteTopic(topicId)
 
       if (error) throw error
 
