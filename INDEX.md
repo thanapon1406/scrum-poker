@@ -79,6 +79,7 @@ planningpokeronlineforfree/
 ├── 🏗️ Application Code
 │   ├── app/                      ← Next.js pages
 │   ├── components/               ← React components
+│   ├── services/                 ← Supabase data access layer
 │   ├── lib/                      ← Utilities
 │   └── types/                    ← TypeScript types
 │
@@ -111,7 +112,7 @@ planningpokeronlineforfree/
 
 ### For Developers
 1. Read [ARCHITECTURE.md](ARCHITECTURE.md) for technical details
-2. Review the code in `app/`, `components/`, `lib/`
+2. Review the code in `app/`, `components/`, `services/`, `lib/`
 3. Check [supabase/README.md](supabase/README.md) for database
 4. Read [CONTRIBUTING.md](CONTRIBUTING.md) to contribute
 

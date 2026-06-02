@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabase'
+import { getRevealedTopicsWithVotes } from '@/services/topics.service'
 import { Topic } from '@/types'
 import { formatAverageResult } from '@/lib/utils'
 
@@ -32,20 +32,7 @@ export default function SessionSummary({
     setLoading(true)
     try {
       // Load all revealed topics with their votes
-      const { data: topicsData, error } = await supabase
-        .from('topics')
-        .select(`
-          *,
-          votes (
-            vote_value,
-            participant:participants (
-              display_name
-            )
-          )
-        `)
-        .eq('room_id', roomId)
-        .eq('is_revealed', true)
-        .order('completed_at', { ascending: true })
+      const { data: topicsData, error } = await getRevealedTopicsWithVotes(roomId)
 
       if (error) throw error
 

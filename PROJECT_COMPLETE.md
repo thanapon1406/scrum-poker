@@ -31,6 +31,14 @@ A **production-ready**, **fully-functional** Planning Poker application with:
 ✅ lib/supabase.ts             - Supabase client
 ```
 
+#### Services (4 files)
+```
+✅ services/rooms.service.ts         - Room DB operations
+✅ services/participants.service.ts  - Participants DB operations
+✅ services/topics.service.ts        - Topics DB operations
+✅ services/votes.service.ts         - Votes DB operations
+```
+
 #### Types & Utils (3 files)
 ```
 ✅ lib/utils.ts                - Helper functions

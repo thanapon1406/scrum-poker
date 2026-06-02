@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { supabase } from '@/lib/supabase'
+import { updateParticipantName } from '@/services/participants.service'
 import { Participant } from '@/types'
 import clsx from 'clsx'
 
@@ -40,10 +40,7 @@ export default function ParticipantList({
 
     setIsUpdating(true)
     try {
-      const { error } = await supabase
-        .from('participants')
-        .update({ display_name: editingName.trim() })
-        .eq('id', participantId)
+      const { error } = await updateParticipantName(participantId, editingName.trim())
 
       if (error) throw error
 

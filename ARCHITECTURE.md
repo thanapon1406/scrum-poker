@@ -16,11 +16,11 @@ Planning Poker Online is a real-time web application built using a modern, serve
 │  │                    Next.js App Router                         │   │
 │  │                                                                │   │
 │  │  ┌────────────┐  ┌────────────┐  ┌────────────┐             │   │
-│  │  │   Pages    │  │ Components │  │   Hooks    │             │   │
+│  │  │   Pages    │  │ Components │  │  Services  │             │   │
 │  │  │            │  │            │  │            │             │   │
-│  │  │ • Home     │  │ • Voting   │  │ • useRoom  │             │   │
-│  │  │ • Room     │  │ • Results  │  │ • useVotes │             │   │
-│  │  │            │  │ • Topics   │  │            │             │   │
+│  │  │ • Home     │  │ • Voting   │  │ • Rooms    │             │   │
+│  │  │ • Room     │  │ • Results  │  │ • Topics   │             │   │
+│  │  │            │  │ • Topics   │  │ • Votes    │             │   │
 │  │  └────────────┘  └────────────┘  └────────────┘             │   │
 │  │                                                                │   │
 │  │  ┌──────────────────────────────────────────────────────┐    │   │

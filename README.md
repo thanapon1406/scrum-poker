@@ -144,6 +144,12 @@ components/
 ├── HostControls.tsx           # Reveal/Reset buttons (host only)
 └── RoomHeader.tsx             # Room info & invite code
 
+services/
+├── rooms.service.ts           # Room API calls
+├── participants.service.ts    # Participant API calls
+├── topics.service.ts          # Topic API calls
+└── votes.service.ts           # Vote API calls
+
 lib/
 ├── supabase.ts                # Supabase client initialization
 └── utils.ts                   # Helper functions (generate code, calculate avg)

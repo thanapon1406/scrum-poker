@@ -2,7 +2,10 @@
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabase'
+import { getRoomByInviteCode, subscribeToRoomEvents, unsubscribeFromRoomEvents } from '@/services/rooms.service'
+import { getParticipantsByRoomId, getParticipantById, getParticipantByRoomAndName, countParticipantsByRoomId, createParticipant } from '@/services/participants.service'
+import { getTopicsByRoomId, updateTopic, deactivateAllTopics } from '@/services/topics.service'
+import { getVotesByTopicId, createVote, updateVote, deleteVotesByTopicId } from '@/services/votes.service'
 import { calculateAverage } from '@/lib/utils'
 import {
   Room,
@@ -46,11 +49,7 @@ export default function RoomPage() {
   // Load room data
   const loadRoom = async () => {
     try {
-      const { data, error } = await supabase
-        .from('rooms')
-        .select('*')
-        .eq('invite_code', inviteCode.toUpperCase())
-        .single()
+      const { data, error } = await getRoomByInviteCode(inviteCode)
 
       if (error || !data) {
         setError('Room not found')
@@ -60,11 +59,7 @@ export default function RoomPage() {
       setRoom(data)
       
       // Load participants immediately after room is loaded
-      const { data: participantsData } = await supabase
-        .from('participants')
-        .select('*')
-        .eq('room_id', data.id)
-        .order('joined_at', { ascending: true })
+      const { data: participantsData } = await getParticipantsByRoomId(data.id)
 
       if (participantsData) setParticipants(participantsData)
     } catch (err) {
@@ -78,11 +73,7 @@ export default function RoomPage() {
   const loadParticipants = async () => {
     if (!room) return
 
-    const { data } = await supabase
-      .from('participants')
-      .select('*')
-      .eq('room_id', room.id)
-      .order('joined_at', { ascending: true })
+    const { data } = await getParticipantsByRoomId(room.id)
 
     if (data) setParticipants(data)
   }
@@ -90,11 +81,7 @@ export default function RoomPage() {
   const loadTopics = async () => {
     if (!room) return
 
-    const { data } = await supabase
-      .from('topics')
-      .select('*')
-      .eq('room_id', room.id)
-      .order('created_at', { ascending: false })
+    const { data } = await getTopicsByRoomId(room.id)
 
     if (data) {
       console.log('Loaded topics:', data)
@@ -107,13 +94,7 @@ export default function RoomPage() {
   }
 
   const loadVotes = async (topicId: string) => {
-    const { data } = await supabase
-      .from('votes')
-      .select(`
-        *,
-        participant:participants(*)
-      `)
-      .eq('topic_id', topicId)
+    const { data } = await getVotesByTopicId(topicId)
 
     if (data) setVotes(data as any)
   }
@@ -121,11 +102,7 @@ export default function RoomPage() {
   // Restore participant from localStorage
   const restoreParticipant = async (participantId: string) => {
     try {
-      const { data, error } = await supabase
-        .from('participants')
-        .select('*')
-        .eq('id', participantId)
-        .single()
+      const { data, error } = await getParticipantById(participantId)
 
       if (data && !error) {
         setCurrentUser(data)
@@ -180,56 +157,29 @@ export default function RoomPage() {
       loadTopics()
     }
 
-    const channel = supabase.channel(`room:${room.id}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'participants',
-          filter: `room_id=eq.${room.id}`,
-        },
-        (payload) => {
-          console.log('Participants changed:', payload)
-          loadParticipants()
+    const channel = subscribeToRoomEvents(
+      room.id,
+      (payload) => {
+        console.log('Participants changed:', payload)
+        loadParticipants()
+      },
+      (payload) => {
+        console.log('Topics changed:', payload)
+        loadTopics()
+        // Clear selected vote when topic changes
+        if (payload.eventType === 'UPDATE') {
+          setSelectedVote(null)
         }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'topics',
-          filter: `room_id=eq.${room.id}`,
-        },
-        (payload) => {
-          console.log('Topics changed:', payload)
-          loadTopics()
-          // Clear selected vote when topic changes
-          if (payload.eventType === 'UPDATE') {
-            setSelectedVote(null)
-          }
-        }
-      )
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'votes',
-        },
-        (payload) => {
-          console.log('Votes changed:', payload)
-          if (activeTopic) loadVotes(activeTopic.id)
-        }
-      )
-      .subscribe((status) => {
-        console.log('Subscription status:', status)
-      })
+      },
+      (payload) => {
+        console.log('Votes changed:', payload)
+        if (activeTopic) loadVotes(activeTopic.id)
+      }
+    )
 
     return () => {
       console.log('Removing real-time subscriptions')
-      supabase.removeChannel(channel)
+      unsubscribeFromRoomEvents(channel)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [room, hasJoined, activeTopic])
@@ -244,12 +194,7 @@ export default function RoomPage() {
 
     try {
       // Check if name is already taken
-      const { data: existing } = await supabase
-        .from('participants')
-        .select('id')
-        .eq('room_id', room.id)
-        .eq('display_name', displayName.trim())
-        .maybeSingle()
+      const { data: existing } = await getParticipantByRoomAndName(room.id, displayName.trim())
 
       if (existing) {
         setError('This name is already taken. Please choose another.')
@@ -259,24 +204,17 @@ export default function RoomPage() {
 
       // Check if this is the first participant (will be host)
       // Query database directly to ensure accurate count
-      const { data: existingParticipants, error: countError } = await supabase
-        .from('participants')
-        .select('id')
-        .eq('room_id', room.id)
+      const { data: existingParticipants, error: countError } = await countParticipantsByRoomId(room.id)
 
       if (countError) throw countError
 
       const isHost = !existingParticipants || existingParticipants.length === 0
 
-      const { data: newParticipant, error } = await supabase
-        .from('participants')
-        .insert({
-          room_id: room.id,
-          display_name: displayName.trim(),
-          is_host: isHost,
-        })
-        .select()
-        .single()
+      const { data: newParticipant, error } = await createParticipant({
+        room_id: room.id,
+        display_name: displayName.trim(),
+        is_host: isHost,
+      })
 
       if (error) throw error
 
@@ -336,13 +274,10 @@ export default function RoomPage() {
 
       if (existingVote) {
         // Update vote
-        await supabase
-          .from('votes')
-          .update({ vote_value: value })
-          .eq('id', existingVote.id)
+        await updateVote(existingVote.id, value)
       } else {
         // Insert new vote
-        await supabase.from('votes').insert({
+        await createVote({
           topic_id: activeTopic.id,
           participant_id: currentUser.id,
           vote_value: value,
@@ -363,14 +298,11 @@ export default function RoomPage() {
     try {
       const average = calculateAverage(votes.map((v) => v.vote_value))
 
-      await supabase
-        .from('topics')
-        .update({
-          is_revealed: true,
-          average_score: average,
-          completed_at: new Date().toISOString(),
-        })
-        .eq('id', activeTopic.id)
+      await updateTopic(activeTopic.id, {
+        is_revealed: true,
+        average_score: average,
+        completed_at: new Date().toISOString(),
+      })
 
       loadTopics()
     } catch (error) {
@@ -382,15 +314,12 @@ export default function RoomPage() {
     if (!activeTopic || !currentUser?.is_host) return
 
     try {
-      await supabase.from('votes').delete().eq('topic_id', activeTopic.id)
+      await deleteVotesByTopicId(activeTopic.id)
 
-      await supabase
-        .from('topics')
-        .update({
-          is_revealed: false,
-          average_score: null,
-        })
-        .eq('id', activeTopic.id)
+      await updateTopic(activeTopic.id, {
+        is_revealed: false,
+        average_score: null,
+      })
 
       setSelectedVote(null)
       loadVotes(activeTopic.id)
@@ -407,10 +336,7 @@ export default function RoomPage() {
 
     try {
       // Deactivate all topics
-      const { error: deactivateError } = await supabase
-        .from('topics')
-        .update({ is_active: false })
-        .eq('room_id', room.id)
+      const { error: deactivateError } = await deactivateAllTopics(room.id)
 
       if (deactivateError) {
         console.error('Error deactivating topics:', deactivateError)
@@ -418,10 +344,7 @@ export default function RoomPage() {
       }
 
       // Activate selected topic
-      const { error: activateError } = await supabase
-        .from('topics')
-        .update({ is_active: true })
-        .eq('id', topicId)
+      const { error: activateError } = await updateTopic(topicId, { is_active: true })
 
       if (activateError) {
         console.error('Error activating topic:', activateError)

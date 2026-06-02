@@ -24,6 +24,12 @@ planningpokeronlineforfree/
 │   ├── RoomHeader.tsx               # Room info & invite code
 │   └── SessionSummary.tsx           # Session summary modal
 │
+├── 📁 services/                     # Supabase Services
+│   ├── rooms.service.ts             # API for rooms
+│   ├── participants.service.ts      # API for participants
+│   ├── topics.service.ts            # API for topics
+│   └── votes.service.ts             # API for votes
+│
 ├── 📁 lib/                          # Utilities
 │   ├── supabase.ts                  # Supabase client
 │   └── utils.ts                     # Helper functions

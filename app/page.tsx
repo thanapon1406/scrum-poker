@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabase'
+import { createRoom } from '@/services/rooms.service'
 import { generateInviteCode } from '@/lib/utils'
 
 export default function HomePage() {
@@ -18,13 +18,7 @@ export default function HomePage() {
     try {
       const inviteCode = generateInviteCode()
 
-      const { data, error } = await supabase
-        .from('rooms')
-        .insert({
-          invite_code: inviteCode,
-        })
-        .select()
-        .single()
+      const { data, error } = await createRoom(inviteCode)
 
       if (error) throw error
 
