@@ -5,6 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-05-29
+
+### Added
+- **Architecture Documentation Update**: Added a highly detailed Mermaid Sequence Diagram inside `ARCHITECTURE.md` to perfectly map the Next.js Client, Supabase API Gateway, PostgreSQL DB, and Realtime Server lifecycle across 4 distinct phases (Initialization, Joining, Voting, Consensus).
+
 ## [1.1.0] - 2025-11-14
 
 ### Added

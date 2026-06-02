@@ -66,12 +66,12 @@ A **production-ready**, **fully-functional** Planning Poker application with:
 ```
 ✅ README.md                   - Main docs
 ✅ QUICKSTART.md               - 5-min guide
-✅ ARCHITECTURE.md             - Technical docs
+✅ ARCHITECTURE.md             - Technical docs (w/ Mermaid Sequence Diagrams)
 ✅ DEPLOYMENT.md               - Deploy guide
 ✅ CONTRIBUTING.md             - Contribution guide
 ✅ CHANGELOG.md                - Version history
 ✅ LICENSE                     - MIT License
-✅ PROJECT_SUMMARY.md          - This file!
+✅ PROJECT_SUMMARY.md          - Overview
 ```
 
 **Total: 33 files** 🎯

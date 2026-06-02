@@ -158,7 +158,7 @@ planningpokeronlineforfree/
 - **DEPLOYMENT.md** - Deployment to Vercel, Netlify, Railway, self-hosted
 
 ### For Developers
-- **ARCHITECTURE.md** - Technical architecture, data flow, schemas
+- **ARCHITECTURE.md** - Technical architecture, data flow (with detailed Mermaid Sequence Diagrams), schemas
 - **CONTRIBUTING.md** - How to contribute
 - **CHANGELOG.md** - Version history
 

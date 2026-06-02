@@ -22,8 +22,7 @@ A fast, simple, and free Planning Poker application for agile teams. Estimate yo
 - **️ Topic Management** - Host can delete topics they no longer need
 - **📊 Session Summary** - Host can view, print, or copy a comprehensive summary of all completed topics
 - **🎨 Clean, Minimal UI** - Inspired by planningpokeronline.com
-- **📱 Responsive Design** - Works on desktop, tablet, and mobile
-
+- **📱 Responsive Design** - Works on desktop, tablet, and mobile- **📈 Comprehensive Architecture Docs** - Featuring detailed Mermaid Sequence Diagrams explaining Next.js, API Gateway, DB, and Realtime Server lifecycles.
 ## 🏗️ Architecture
 
 ### Tech Stack
