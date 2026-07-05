@@ -68,7 +68,11 @@ export interface Database {
           is_revealed: boolean
           average_score: number | null
           created_at: string
+          timer_enabled: boolean
+          timer_seconds: number | null
+          discussion_started_at: string | null
           completed_at: string | null
+          discussion_duration_seconds: number | null
         }
         Insert: {
           id?: string
@@ -79,7 +83,11 @@ export interface Database {
           is_revealed?: boolean
           average_score?: number | null
           created_at?: string
+          timer_enabled?: boolean
+          timer_seconds?: number | null
+          discussion_started_at?: string | null
           completed_at?: string | null
+          discussion_duration_seconds?: number | null
         }
         Update: {
           id?: string
@@ -90,7 +98,11 @@ export interface Database {
           is_revealed?: boolean
           average_score?: number | null
           created_at?: string
+          timer_enabled?: boolean
+          timer_seconds?: number | null
+          discussion_started_at?: string | null
           completed_at?: string | null
+          discussion_duration_seconds?: number | null
         }
       }
       votes: {

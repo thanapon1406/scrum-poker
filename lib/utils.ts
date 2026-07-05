@@ -135,6 +135,28 @@ export function formatDate(timestamp: string): string {
 }
 
 /**
+ * Formats a duration in seconds into a compact human-readable string.
+ * @param seconds - Duration in seconds
+ * @returns Formatted duration (e.g., "4m 12s", "1h 03m")
+ */
+export function formatDuration(seconds: number | null | undefined): string {
+  if (seconds === null || seconds === undefined || Number.isNaN(seconds)) {
+    return '—'
+  }
+
+  const totalSeconds = Math.max(0, Math.round(seconds))
+  const hours = Math.floor(totalSeconds / 3600)
+  const minutes = Math.floor((totalSeconds % 3600) / 60)
+  const remainingSeconds = totalSeconds % 60
+
+  if (hours > 0) {
+    return `${hours}h ${String(minutes).padStart(2, '0')}m`
+  }
+
+  return `${minutes}m ${String(remainingSeconds).padStart(2, '0')}s`
+}
+
+/**
  * Formats a timestamp to a relative time string
  * @param timestamp - ISO timestamp string
  * @returns Relative time (e.g., "2 minutes ago")

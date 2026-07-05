@@ -23,6 +23,7 @@ import VotingCard from '@/components/VotingCard'
 import ResultsPanel from '@/components/ResultsPanel'
 import HostControls from '@/components/HostControls'
 import SessionSummary from '@/components/SessionSummary'
+import { formatDuration } from '@/lib/utils'
 
 export default function RoomPage() {
   const params = useParams()
@@ -37,6 +38,7 @@ export default function RoomPage() {
   const [activeTopic, setActiveTopic] = useState<Topic | null>(null)
   const [votes, setVotes] = useState<Vote[]>([])
   const [selectedVote, setSelectedVote] = useState<VoteValue | null>(null)
+  const [now, setNow] = useState(() => Date.now())
   
   const [displayName, setDisplayName] = useState('')
   const [isJoining, setIsJoining] = useState(false)
@@ -45,6 +47,18 @@ export default function RoomPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [showSummary, setShowSummary] = useState(false)
+
+  useEffect(() => {
+    if (!activeTopic?.discussion_started_at || activeTopic.is_revealed || !activeTopic.timer_enabled) {
+      return
+    }
+
+    const timer = window.setInterval(() => {
+      setNow(Date.now())
+    }, 1000)
+
+    return () => window.clearInterval(timer)
+  }, [activeTopic?.discussion_started_at, activeTopic?.is_revealed, activeTopic?.timer_enabled, activeTopic?.id])
 
   // Load room data
   const loadRoom = async () => {
@@ -297,11 +311,16 @@ export default function RoomPage() {
 
     try {
       const average = calculateAverage(votes.map((v) => v.vote_value))
+      const startedAt = activeTopic.discussion_started_at ?? activeTopic.created_at
+      const durationSeconds = startedAt
+        ? Math.max(0, Math.round((Date.now() - new Date(startedAt).getTime()) / 1000))
+        : null
 
       await updateTopic(activeTopic.id, {
         is_revealed: true,
         average_score: average,
         completed_at: new Date().toISOString(),
+        discussion_duration_seconds: durationSeconds,
       })
 
       loadTopics()
@@ -319,6 +338,9 @@ export default function RoomPage() {
       await updateTopic(activeTopic.id, {
         is_revealed: false,
         average_score: null,
+        completed_at: null,
+        discussion_started_at: new Date().toISOString(),
+        discussion_duration_seconds: null,
       })
 
       setSelectedVote(null)
@@ -331,6 +353,10 @@ export default function RoomPage() {
 
   const handleTopicSelected = async (topicId: string) => {
     if (!currentUser?.is_host || !room) return
+    if (topicId === activeTopic?.id) return
+
+    const selectedTopic = topics.find((topic) => topic.id === topicId)
+    if (!selectedTopic) return
 
     console.log('Host selecting topic:', topicId)
 
@@ -344,7 +370,14 @@ export default function RoomPage() {
       }
 
       // Activate selected topic
-      const { error: activateError } = await updateTopic(topicId, { is_active: true })
+      const { error: activateError } = await updateTopic(topicId, {
+        is_active: true,
+        discussion_started_at: new Date().toISOString(),
+        discussion_duration_seconds: null,
+        is_revealed: false,
+        completed_at: null,
+        average_score: null,
+      })
 
       if (activateError) {
         console.error('Error activating topic:', activateError)
@@ -523,9 +556,26 @@ export default function RoomPage() {
                 {/* Voting Cards */}
                 {!activeTopic.is_revealed && (
                   <div>
-                    <h3 className="text-lg font-semibold text-slate-700 mb-4">
-                      {isObserver ? 'Waiting for Votes (Observer Mode)' : 'Cast Your Vote'}
-                    </h3>
+                    <div className="mb-4 flex items-center justify-between gap-3">
+                      <h3 className="text-lg font-semibold text-slate-700">
+                        {isObserver ? 'Waiting for Votes (Observer Mode)' : 'Cast Your Vote'}
+                      </h3>
+                      {activeTopic.timer_enabled && activeTopic.discussion_started_at && activeTopic.timer_seconds !== null && (
+                        (() => {
+                          const elapsedSeconds = Math.max(
+                            0,
+                            Math.round((now - new Date(activeTopic.discussion_started_at).getTime()) / 1000),
+                          )
+                          const remainingSeconds = Math.max(0, activeTopic.timer_seconds - elapsedSeconds)
+
+                          return (
+                            <div className="rounded-full border border-primary-200 bg-primary-50 px-3 py-1 text-xs font-semibold text-primary-700">
+                              Countdown: {formatDuration(remainingSeconds)}
+                            </div>
+                          )
+                        })()
+                      )}
+                    </div>
                     {isObserver ? (
                       <div className="text-center py-8 bg-blue-50 border border-blue-200 rounded-lg">
                         <div className="text-4xl mb-3">👁️</div>

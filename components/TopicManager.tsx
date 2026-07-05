@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { createTopic, deleteTopic } from '@/services/topics.service'
 import { Topic } from '@/types'
+import { formatDuration } from '@/lib/utils'
 
 interface TopicManagerProps {
   roomId: string
@@ -24,10 +25,32 @@ export default function TopicManager({
   const [isCreating, setIsCreating] = useState(false)
   const [newTopicTitle, setNewTopicTitle] = useState('')
   const [newTopicDescription, setNewTopicDescription] = useState('')
+  const [timerEnabled, setTimerEnabled] = useState(false)
+  const [timerSeconds, setTimerSeconds] = useState('60')
+  const [now, setNow] = useState(() => Date.now())
+
+  useEffect(() => {
+    if (!activeTopic?.timer_enabled || !activeTopic?.discussion_started_at || activeTopic.is_revealed) {
+      return
+    }
+
+    const timer = window.setInterval(() => {
+      setNow(Date.now())
+    }, 1000)
+
+    return () => window.clearInterval(timer)
+  }, [activeTopic?.timer_enabled, activeTopic?.discussion_started_at, activeTopic?.is_revealed, activeTopic?.id])
 
   const handleCreateTopic = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!newTopicTitle.trim()) return
+
+    const parsedTimerSeconds = timerEnabled ? Number.parseInt(timerSeconds, 10) : null
+
+    if (timerEnabled && (!parsedTimerSeconds || parsedTimerSeconds <= 0)) {
+      alert('Please enter a timer value in seconds greater than 0.')
+      return
+    }
 
     setIsCreating(true)
     try {
@@ -36,12 +59,16 @@ export default function TopicManager({
         title: newTopicTitle.trim(),
         description: newTopicDescription.trim() || null,
         is_active: false,
+        timer_enabled: timerEnabled,
+        timer_seconds: parsedTimerSeconds,
       })
 
       if (error) throw error
 
       setNewTopicTitle('')
       setNewTopicDescription('')
+      setTimerEnabled(false)
+      setTimerSeconds('60')
       onTopicCreated()
     } catch (error) {
       console.error('Error creating topic:', error)
@@ -96,6 +123,37 @@ export default function TopicManager({
             rows={2}
             maxLength={500}
           />
+          <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 space-y-3">
+            <label className="flex items-center gap-3 text-sm font-medium text-slate-700">
+              <input
+                type="checkbox"
+                checked={timerEnabled}
+                onChange={(e) => setTimerEnabled(e.target.checked)}
+                className="h-4 w-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
+              />
+              Enable countdown timer
+            </label>
+            {timerEnabled && (
+              <div className="space-y-1">
+                <label className="block text-xs font-medium uppercase tracking-wide text-slate-500">
+                  Countdown seconds
+                </label>
+                <input
+                  type="number"
+                  min={1}
+                  step={1}
+                  inputMode="numeric"
+                  value={timerSeconds}
+                  onChange={(e) => setTimerSeconds(e.target.value)}
+                  placeholder="60"
+                  className="input"
+                />
+                <p className="text-xs text-slate-500">
+                  Enter seconds only. For example, 60 means 60 seconds.
+                </p>
+              </div>
+            )}
+          </div>
           <button
             type="submit"
             disabled={isCreating || !newTopicTitle.trim()}
@@ -148,8 +206,18 @@ export default function TopicManager({
                       </span>
                     )}
                     {topic.id === activeTopic?.id && (
-                      <span className="text-xs bg-primary-500 text-white px-2 py-0.5 rounded">
+                      <span className="text-xs bg-primary-500 text-white px-2 py-0.5 rounded flex items-center gap-1">
                         Active
+                        {topic.timer_enabled && topic.discussion_started_at && !topic.is_revealed && topic.timer_seconds !== null && (
+                          <span className="opacity-90">
+                            · {formatDuration(Math.max(0, topic.timer_seconds - Math.max(0, Math.round((now - new Date(topic.discussion_started_at).getTime()) / 1000))))}
+                          </span>
+                        )}
+                        {topic.timer_enabled && topic.discussion_duration_seconds !== null && topic.is_revealed && (
+                          <span className="opacity-90">
+                            · {formatDuration(topic.discussion_duration_seconds)}
+                          </span>
+                        )}
                       </span>
                     )}
                     {topic.is_revealed && (

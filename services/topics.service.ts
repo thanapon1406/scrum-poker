@@ -25,7 +25,14 @@ export const getRevealedTopicsWithVotes = async (roomId: string) => {
     .order('completed_at', { ascending: true })
 }
 
-export const createTopic = async (data: { room_id: string; title: string; description: string | null; is_active: boolean }) => {
+export const createTopic = async (data: {
+  room_id: string
+  title: string
+  description: string | null
+  is_active: boolean
+  timer_enabled: boolean
+  timer_seconds: number | null
+}) => {
   return supabase
     .from('topics')
     .insert(data)
