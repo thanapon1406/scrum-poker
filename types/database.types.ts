@@ -73,6 +73,7 @@ export interface Database {
           discussion_started_at: string | null
           completed_at: string | null
           discussion_duration_seconds: number | null
+          is_overtime: boolean
         }
         Insert: {
           id?: string
@@ -88,6 +89,7 @@ export interface Database {
           discussion_started_at?: string | null
           completed_at?: string | null
           discussion_duration_seconds?: number | null
+          is_overtime?: boolean
         }
         Update: {
           id?: string
@@ -103,6 +105,7 @@ export interface Database {
           discussion_started_at?: string | null
           completed_at?: string | null
           discussion_duration_seconds?: number | null
+          is_overtime?: boolean
         }
       }
       votes: {

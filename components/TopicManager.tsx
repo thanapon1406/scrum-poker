@@ -41,6 +41,19 @@ export default function TopicManager({
     return () => window.clearInterval(timer)
   }, [activeTopic?.timer_enabled, activeTopic?.discussion_started_at, activeTopic?.is_revealed, activeTopic?.id])
 
+  const getRemainingSeconds = (topic: Topic) => {
+    if (!topic.timer_enabled || topic.timer_seconds === null || !topic.discussion_started_at) {
+      return null
+    }
+
+    const elapsedSeconds = Math.max(
+      0,
+      Math.round((now - new Date(topic.discussion_started_at).getTime()) / 1000),
+    )
+
+    return Math.max(0, topic.timer_seconds - elapsedSeconds)
+  }
+
   const handleCreateTopic = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!newTopicTitle.trim()) return
@@ -178,7 +191,9 @@ export default function TopicManager({
               key={topic.id}
               className={`p-3 rounded-lg border transition-colors ${
                 topic.id === activeTopic?.id
-                  ? 'bg-primary-50 border-primary-300'
+                  ? topic.is_overtime && !topic.is_revealed
+                    ? 'bg-red-50 border-red-300'
+                    : 'bg-primary-50 border-primary-300'
                   : topic.is_revealed
                   ? 'bg-green-50 border-green-200'
                   : 'bg-white border-slate-200 hover:border-slate-300'
@@ -206,13 +221,21 @@ export default function TopicManager({
                       </span>
                     )}
                     {topic.id === activeTopic?.id && (
-                      <span className="text-xs bg-primary-500 text-white px-2 py-0.5 rounded flex items-center gap-1">
-                        Active
-                        {topic.timer_enabled && topic.discussion_started_at && !topic.is_revealed && topic.timer_seconds !== null && (
-                          <span className="opacity-90">
-                            · {formatDuration(Math.max(0, topic.timer_seconds - Math.max(0, Math.round((now - new Date(topic.discussion_started_at).getTime()) / 1000))))}
-                          </span>
-                        )}
+                      <span
+                        className={`text-xs text-white px-2 py-0.5 rounded flex items-center gap-1 ${
+                          topic.is_overtime && !topic.is_revealed ? 'bg-red-500' : 'bg-primary-500'
+                        }`}
+                      >
+                        {topic.is_overtime && !topic.is_revealed ? 'Overtime' : 'Active'}
+                        {topic.timer_enabled && topic.discussion_started_at && !topic.is_revealed && topic.timer_seconds !== null && (() => {
+                          const remainingSeconds = getRemainingSeconds(topic)
+
+                          return remainingSeconds !== null ? (
+                            <span className="opacity-90">
+                              · {formatDuration(remainingSeconds)}
+                            </span>
+                          ) : null
+                        })()}
                         {topic.timer_enabled && topic.discussion_duration_seconds !== null && topic.is_revealed && (
                           <span className="opacity-90">
                             · {formatDuration(topic.discussion_duration_seconds)}
