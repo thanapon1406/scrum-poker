@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { getRevealedTopicsWithVotes } from '@/services/topics.service'
 import { Topic } from '@/types'
-import { formatAverageResult } from '@/lib/utils'
+import { formatAverageResult, formatDuration } from '@/lib/utils'
 
 interface SessionSummaryProps {
   roomId: string
@@ -42,6 +42,23 @@ export default function SessionSummary({
     } finally {
       setLoading(false)
     }
+  }
+
+  const getTopicDurationSeconds = (topic: TopicWithVotes) => {
+    if (topic.discussion_duration_seconds !== null) {
+      return topic.discussion_duration_seconds
+    }
+
+    if (!topic.discussion_started_at || !topic.completed_at) {
+      return null
+    }
+
+    return Math.max(
+      0,
+      Math.round(
+        (new Date(topic.completed_at).getTime() - new Date(topic.discussion_started_at).getTime()) / 1000,
+      ),
+    )
   }
 
   useEffect(() => {
@@ -158,6 +175,10 @@ export default function SessionSummary({
       const voteValues = topic.votes.map(v => v.vote_value)
       const result = formatAverageResult(voteValues)
       html += `<div class="result">Final Result: ${result}</div>`
+      html += `<div class="result">Discussion Time: ${formatDuration(getTopicDurationSeconds(topic))}</div>`
+      if (topic.is_overtime) {
+        html += `<div class="result" style="color:#dc2626;">Overtime</div>`
+      }
 
       html += `<div class="votes">`
       topic.votes.forEach(vote => {
@@ -194,6 +215,10 @@ export default function SessionSummary({
       const voteValues = topic.votes.map(v => v.vote_value)
       const result = formatAverageResult(voteValues)
       text += `Final Result: ${result}\n\n`
+      text += `Discussion Time: ${formatDuration(getTopicDurationSeconds(topic))}\n\n`
+      if (topic.is_overtime) {
+        text += `Overtime: Yes\n\n`
+      }
 
       text += 'Individual Votes:\n'
       topic.votes.forEach(vote => {
@@ -251,11 +276,16 @@ export default function SessionSummary({
               {topics.map((topic, index) => {
                 const voteValues = topic.votes.map(v => v.vote_value)
                 const result = formatAverageResult(voteValues)
+                const isOvertime = topic.is_overtime
 
                 return (
                   <div
                     key={topic.id}
-                    className="bg-slate-50 rounded-lg p-5 border border-slate-200 print:border print:border-slate-300 print:mb-4"
+                    className={`rounded-lg p-5 border print:mb-4 ${
+                      isOvertime
+                        ? 'bg-red-50 border-red-200 print:border-red-300'
+                        : 'bg-slate-50 border-slate-200 print:border-slate-300'
+                    }`}
                   >
                     {/* Topic Header */}
                     <div className="flex items-start justify-between mb-3">
@@ -275,6 +305,22 @@ export default function SessionSummary({
                           <p className="text-2xl font-bold">{result}</p>
                         </div>
                       </div>
+                    </div>
+
+                    <div className="mb-4 flex flex-wrap gap-2 text-xs">
+                      <span className="rounded-full bg-slate-200 px-3 py-1 font-medium text-slate-700">
+                        Discussion time: {formatDuration(getTopicDurationSeconds(topic))}
+                      </span>
+                      {isOvertime && (
+                        <span className="rounded-full bg-red-600 px-3 py-1 font-medium text-white">
+                          Overtime
+                        </span>
+                      )}
+                      {topic.completed_at && (
+                        <span className="rounded-full bg-slate-200 px-3 py-1 font-medium text-slate-700">
+                          Completed: {new Date(topic.completed_at).toLocaleString()}
+                        </span>
+                      )}
                     </div>
 
                     {/* Individual Votes */}
@@ -299,12 +345,6 @@ export default function SessionSummary({
                       </div>
                     </div>
 
-                    {/* Completed Time */}
-                    {topic.completed_at && (
-                      <p className="text-xs text-slate-500 mt-3">
-                        Completed: {new Date(topic.completed_at).toLocaleString()}
-                      </p>
-                    )}
                   </div>
                 )
               })}

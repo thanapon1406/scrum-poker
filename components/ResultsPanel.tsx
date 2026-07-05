@@ -4,7 +4,7 @@ import { useState, useRef } from 'react'
 import * as htmlToImage from 'html-to-image'
 import { updateTopic } from '@/services/topics.service'
 import { VoteWithParticipant, Topic } from '@/types'
-import { getVoteCardColor, getProgressBarColor, formatAverageResult } from '@/lib/utils'
+import { getVoteCardColor, getProgressBarColor, formatAverageResult, formatDuration } from '@/lib/utils'
 import clsx from 'clsx'
 
 interface ResultsPanelProps {
@@ -116,6 +116,23 @@ export default function ResultsPanel({
   // Get formatted result (handles ties)
   const resultText = formatAverageResult(votes.map(v => v.vote_value))
 
+  const discussionTimeSeconds = (() => {
+    if (topic.discussion_duration_seconds !== null) {
+      return topic.discussion_duration_seconds
+    }
+
+    if (!topic.discussion_started_at || !topic.completed_at) {
+      return null
+    }
+
+    return Math.max(
+      0,
+      Math.round(
+        (new Date(topic.completed_at).getTime() - new Date(topic.discussion_started_at).getTime()) / 1000,
+      ),
+    )
+  })()
+
   // Calculate vote distribution
   const voteDistribution = votes.reduce((acc, vote) => {
     acc[vote.vote_value] = (acc[vote.vote_value] || 0) + 1
@@ -188,6 +205,17 @@ export default function ResultsPanel({
           <p className="text-5xl font-bold">{resultText}</p>
         </div>
       )}
+
+      <div className="mb-6 flex flex-wrap gap-2 text-xs">
+        <span className="rounded-full bg-slate-200 px-3 py-1 font-medium text-slate-700">
+          Time used: {formatDuration(discussionTimeSeconds)}
+        </span>
+        {topic.is_overtime && (
+          <span className="rounded-full bg-red-600 px-3 py-1 font-medium text-white">
+            Overtime
+          </span>
+        )}
+      </div>
 
       {/* Host Description Section */}
       {isHost && (
