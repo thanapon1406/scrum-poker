@@ -68,6 +68,9 @@ Open [http://localhost:3000](http://localhost:3000) 🎉
    - Click the edit icon (✏️) next to your name to change it
    - As host, hover over topics to see the delete button (🗑️)
    - After revealing votes, add notes/explanations as host
+   - **Enable the countdown timer** when creating a topic to set a time limit
+   - **Watch the timer count down** in real-time for all participants
+   - **See the "Overtime" indicator** when the timer expires
    - After completing topics, click "View Session Summary" to see all results
    - Print or copy the session summary for documentation
 

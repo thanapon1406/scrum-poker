@@ -18,6 +18,9 @@
 5. Click **Run** (or press Ctrl/Cmd + Enter)
 6. You should see "Success. No rows returned" message
 7. **Repeat steps 2-6** for `supabase/migrations/002_enable_realtime.sql` to enable real-time updates
+8. **Repeat steps 2-6** for `supabase/migrations/003_public_api_grants.sql` to set up public API grants
+9. **Repeat steps 2-6** for `supabase/migrations/004_add_topic_timer_fields.sql` to add timer fields to topics
+10. **Repeat steps 2-6** for `supabase/migrations/005_add_overtime_flag.sql` to add overtime flag
 
 #### Option B: Using Supabase CLI (Advanced)
 ```bash
@@ -91,6 +94,11 @@ Stores stories/tasks to estimate.
 - `is_active` (BOOLEAN) - Currently voting on
 - `is_revealed` (BOOLEAN) - Votes revealed
 - `average_score` (DECIMAL)
+- `timer_enabled` (BOOLEAN) - Whether countdown timer is enabled
+- `timer_seconds` (INTEGER) - Duration of countdown timer in seconds
+- `discussion_started_at` (TIMESTAMPTZ) - When topic was activated (timer start)
+- `discussion_duration_seconds` (INTEGER) - Actual discussion duration
+- `is_overtime` (BOOLEAN) - Whether timer expired before reveal
 - `created_at`, `completed_at` (Timestamps)
 
 #### `votes`

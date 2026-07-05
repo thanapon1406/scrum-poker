@@ -70,6 +70,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PostgreSQL database schema with RLS
 - Comprehensive documentation and architecture guide
 
+## [1.4.0] - 2026-07-05
+
+### Added
+- **Countdown Timer**: Host can now set a countdown timer when creating a topic
+  - Optional timer with configurable duration (in seconds)
+  - Real-time countdown display for all participants
+  - Automatic overtime detection when timer expires
+  - Red "Overtime" UI indicator when timer runs out
+  - Discussion duration tracking (time from activation to reveal)
+  - Overtime flag displayed in session summary and results panel
+- **Timer Fields in Database**: New columns added to `topics` table
+  - `timer_enabled` (BOOLEAN) - Whether timer is enabled for the topic
+  - `timer_seconds` (INTEGER) - Duration of the timer in seconds
+  - `discussion_started_at` (TIMESTAMPTZ) - When the topic was activated
+  - `discussion_duration_seconds` (INTEGER) - Actual discussion duration
+  - `is_overtime` (BOOLEAN) - Whether the timer expired before reveal
+- **Utility Functions**: New helper functions in `lib/utils.ts`
+  - `formatDuration()` - Formats seconds into human-readable string (e.g., "4m 12s")
+  - `formatRelativeTime()` - Formats timestamps to relative time strings
+
+### Changed
+- **Topic Creation Form**: Added timer checkbox and seconds input for host
+- **Topic List Items**: Shows countdown timer for active topics, overtime indicator, and discussion duration
+- **Results Panel**: Displays discussion time and overtime badge
+- **Session Summary**: Shows discussion time and overtime status per topic
+- **Room Page**: Client-side timer tick with `setInterval` for countdown synchronization
+- **Database Migrations**: Added migrations 004 and 005 for timer fields
+
 ## [Unreleased]
 
 ### Planned
@@ -77,7 +105,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Dark mode
 - Custom voting decks
 - Export voting history
-- Timer mode for auto-reveal
 - Multi-language support
 - Mobile app (React Native)
 
