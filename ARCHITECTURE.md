@@ -21,6 +21,7 @@ Planning Poker Online is a real-time web application built using a modern, serve
 │  │  │ • Home     │  │ • Voting   │  │ • Rooms    │             │   │
 │  │  │ • Room     │  │ • Results  │  │ • Topics   │             │   │
 │  │  │            │  │ • Topics   │  │ • Votes    │             │   │
+│  │  │            │  │ • Timer    │  │            │             │   │
 │  │  └────────────┘  └────────────┘  └────────────┘             │   │
 │  │                                                                │   │
 │  │  ┌──────────────────────────────────────────────────────┐    │   │
@@ -157,10 +158,23 @@ sequenceDiagram
     Note over C, RT: PHASE 3: Topic Management & Live Voting
     
     Note over C: Host creates & activates a Topic
-    C->>AG: POST /rest/v1/topics<br/>Body: { room_id, title, is_active: true }
+    C->>AG: POST /rest/v1/topics<br/>Body: { room_id, title, is_active: true, timer_enabled: true, timer_seconds: 60 }
     AG->>DB: INSERT INTO topics
     DB->>RT: CDC Trigger: INSERT topic
     RT-->>C: Broadcast: 'postgres_changes' (New Topic)
+
+    Note over C: Host activates a timer-enabled topic
+    C->>AG: PATCH /rest/v1/topics?id=eq.[topic_id]<br/>Body: { discussion_started_at: now }
+    
+    Note over C, DB: Timer starts counting down on all clients via real-time sync
+    DB->>RT: CDC Trigger: UPDATE topic (discussion_started_at)
+    RT-->>C: Broadcast: 'postgres_changes' (Timer Started)
+    Note over C: All participants see countdown timer UI
+    
+    Note over C, DB: When timer expires, overtime flag is set
+    DB->>RT: CDC Trigger: UPDATE topic (is_overtime: true)
+    RT-->>C: Broadcast: 'postgres_changes' (Overtime)
+    Note over C: UI switches to "Overtime" red styling
     
     Note over C: Participant clicks a Voting Card (e.g., "5")
     C->>AG: POST /rest/v1/votes<br/>Body: { topic_id, participant_id, vote_value: "5" }
@@ -176,18 +190,18 @@ sequenceDiagram
     Note over C, RT: PHASE 4: Reveal Results & Analysis
     
     Note over C: Host clicks "Reveal Votes"
-    C->>AG: PATCH /rest/v1/topics?id=eq.[topic_id]<br/>Body: { is_revealed: true }
+    C->>AG: PATCH /rest/v1/topics?id=eq.[topic_id]<br/>Body: { is_revealed: true, completed_at: now, discussion_duration_seconds: ... }
     
-    AG->>DB: UPDATE topics SET is_revealed = true
+    AG->>DB: UPDATE topics SET is_revealed = true, completed_at = ..., discussion_duration_seconds = ...
     
     Note over DB: PostgreSQL calculates mode (most chosen card)
     DB->>DB: EXECUTE calculate_topic_average()
     DB->>DB: UPDATE topics SET average_score = Mode_Result
     
-    DB->>RT: CDC Trigger: UPDATE topic (is_revealed, average_score)
+    DB->>RT: CDC Trigger: UPDATE topic (is_revealed, average_score, discussion_duration_seconds)
     RT-->>C: Broadcast: 'postgres_changes' (Topic Update)
     
-    Note over C: UI flips cards. All participants now see:<br/>1. Individual Vote values.<br/>2. Final Average / Tie results.
+    Note over C: UI flips cards. All participants now see:<br/>1. Individual Vote values.<br/>2. Final Result (mode).<br/>3. Discussion time duration.<br/>4. Overtime indicator if timer expired.
     
     Note over C: Host adds concluding notes (optional)
     C->>AG: PATCH /rest/v1/topics?id=eq.[topic_id]<br/>Body: { description: 'Final consensus thoughts' }
@@ -236,11 +250,15 @@ Load existing participants, topics, votes
 ### 3. Voting Flow
 
 ```
-Host creates/selects a topic
+Host creates/selects a topic (optionally with countdown timer)
     ↓
 Topic becomes active (is_active = true)
     ↓
-All participants see active topic
+If timer enabled: discussion_started_at is set, timer starts counting down
+    ↓
+When timer expires: is_overtime flag is set, UI shows red "Overtime" indicator
+    ↓
+All participants see active topic with countdown timer (if enabled)
     ↓
 Participant clicks voting card
     ↓
@@ -252,11 +270,11 @@ All participants see "Voted" status
     ↓
 Host clicks "Reveal"
     ↓
-Update topic (is_revealed = true, average_score)
+Update topic (is_revealed = true, average_score, completed_at, discussion_duration_seconds)
     ↓
 Realtime broadcast
     ↓
-All participants see results
+All participants see results with discussion time and overtime indicator
 ```
 
 ### 4. Real-time Synchronization Flow
@@ -309,21 +327,26 @@ UI re-renders automatically
         │
         │ 1:N
         ▼
-┌─────────────────┐         ┌─────────────────┐
-│     topics      │         │      votes      │
-├─────────────────┤         ├─────────────────┤
-│ id              │ PK, UUID│ id              │ PK, UUID
-│ room_id         │ FK      │ topic_id        │ FK → topics.id
-│ title           │ TEXT    │ participant_id  │ FK → participants.id
-│ description     │ TEXT    │ vote_value      │ TEXT
-│ is_active       │ BOOLEAN │ created_at      │ TIMESTAMP
-│ is_revealed     │ BOOLEAN │ updated_at      │ TIMESTAMP
-│ average_score   │ DECIMAL └─────────────────┘
-│ created_at      │ TIMESTAMP    │
-│ completed_at    │ TIMESTAMP    │
-└─────────────────┘              │
-        │ 1:N                    │
-        └────────────────────────┘
+┌──────────────────────────┐         ┌─────────────────┐
+│         topics           │         │      votes      │
+├──────────────────────────┤         ├─────────────────┤
+│ id                      │ PK, UUID│ id              │ PK, UUID
+│ room_id                 │ FK      │ topic_id        │ FK → topics.id
+│ title                   │ TEXT    │ participant_id  │ FK → participants.id
+│ description             │ TEXT    │ vote_value      │ TEXT
+│ is_active               │ BOOLEAN │ created_at      │ TIMESTAMP
+│ is_revealed             │ BOOLEAN │ updated_at      │ TIMESTAMP
+│ average_score           │ DECIMAL └─────────────────┘
+│ timer_enabled           │ BOOLEAN      │
+│ timer_seconds           │ INTEGER      │
+│ discussion_started_at   │ TIMESTAMPTZ  │
+│ discussion_duration_seconds│ INTEGER   │
+│ is_overtime             │ BOOLEAN      │
+│ created_at              │ TIMESTAMP    │
+│ completed_at            │ TIMESTAMP    │
+└──────────────────────────┘             │
+        │ 1:N                           │
+        └───────────────────────────────┘
 ```
 
 ### Key Constraints
@@ -419,8 +442,8 @@ channel
 |-------|--------|---------|
 | `participants` | INSERT | User joins room |
 | `participants` | DELETE | User leaves room |
-| `topics` | INSERT | Host creates topic |
-| `topics` | UPDATE | Topic activated/revealed |
+| `topics` | INSERT | Host creates topic (with timer settings) |
+| `topics` | UPDATE | Topic activated/revealed/timer started/overtime flagged |
 | `votes` | INSERT | User submits vote |
 | `votes` | UPDATE | User changes vote |
 | `votes` | DELETE | Host resets votes |
@@ -450,7 +473,13 @@ RoomPage (app/room/[inviteCode]/page.tsx)
   │
   ├── TopicManager
   │   ├── Topic creation form (host only)
+  │   │   ├── Title input
+  │   │   ├── Description textarea
+  │   │   └── Timer settings (checkbox + seconds input)
   │   ├── Topic list items
+  │   │   ├── Timer countdown display (for active timer-enabled topics)
+  │   │   ├── Overtime indicator (red styling when timer expired)
+  │   │   └── Discussion duration (for revealed timer-enabled topics)
   │   └── Delete button per topic (host only)
   │
   ├── VotingCard (×13)
@@ -461,6 +490,7 @@ RoomPage (app/room/[inviteCode]/page.tsx)
   │   ├── Tie handling ("X or Y" format)
   │   ├── Vote distribution chart
   │   ├── Individual votes list
+  │   ├── Discussion time & overtime indicator
   │   └── Host notes/description editor
   │
   ├── HostControls (host only)
@@ -469,6 +499,8 @@ RoomPage (app/room/[inviteCode]/page.tsx)
   │
   └── SessionSummary (host only)
       ├── Modal with all completed topics
+      ├── Discussion time per topic
+      ├── Overtime indication per topic
       ├── Print functionality
       └── Copy to clipboard
 ```
@@ -486,6 +518,7 @@ const [topics, setTopics] = useState<Topic[]>([])
 const [activeTopic, setActiveTopic] = useState<Topic | null>(null)
 const [votes, setVotes] = useState<Vote[]>([])
 const [selectedVote, setSelectedVote] = useState<VoteValue | null>(null)
+const [now, setNow] = useState(() => Date.now()) // Timer tick state
 ```
 
 ### Data Fetching Strategy
@@ -494,6 +527,20 @@ const [selectedVote, setSelectedVote] = useState<VoteValue | null>(null)
 2. **Real-time Updates:** Supabase subscriptions trigger refetch
 3. **Optimistic Updates:** UI updates immediately, syncs with server
 4. **Error Handling:** Retry logic and user-friendly error messages
+
+### Timer Implementation Details
+
+The countdown timer works as follows:
+
+1. **Topic Creation:** Host optionally enables a timer and sets duration (in seconds) when creating a topic
+2. **Timer Start:** When host clicks a topic to activate it, `discussion_started_at` is set to the current timestamp
+3. **Countdown Display:** All clients use a `setInterval` (1 second) to calculate remaining time: `remaining = timer_seconds - (now - discussion_started_at)`
+4. **Overtime Detection:** Once the remaining time reaches 0, the client sets `is_overtime = true` via an API call (with a ref to prevent duplicate calls)
+5. **UI States:**
+   - Normal countdown: Blue theme with remaining time display
+   - Overtime: Red theme with "Overtime" label
+   - Revealed: Shows discussion duration
+6. **Discussion Duration:** Calculated as `completed_at - discussion_started_at` (or stored directly in `discussion_duration_seconds`)
 
 ## 🚀 Performance
 
@@ -547,9 +594,9 @@ npm install -D cypress # for E2E testing
 
 ### Test Coverage
 
-1. **Unit Tests:** Utility functions (calculateAverage, generateInviteCode)
+1. **Unit Tests:** Utility functions (calculateAverage, generateInviteCode, formatDuration)
 2. **Component Tests:** UI components with mocked data
-3. **Integration Tests:** Room flow, voting flow
+3. **Integration Tests:** Room flow, voting flow, timer countdown
 4. **E2E Tests:** Full user journey with Cypress
 
 ## 📈 Monitoring & Analytics
@@ -567,16 +614,14 @@ npm install -D cypress # for E2E testing
 
 1. **User Authentication:** Optional login for saved rooms
 2. **Room Templates:** Pre-configured voting decks
-3. **Timer Mode:** Auto-reveal after time limit
-4. **Custom Card Decks:** T-shirt sizes, hours, etc.
-5. **Export Results:** Download voting history as CSV/PDF
-6. **Room Persistence:** Save room for later use
-7. **Spectator Mode:** Join without voting rights
-8. **Multi-language:** i18n support
-9. **Dark Mode:** Theme toggle
-10. **Mobile App:** React Native version
+3. **Custom Card Decks:** T-shirt sizes, hours, etc.
+4. **Export Results:** Download voting history as CSV/PDF
+5. **Room Persistence:** Save room for later use
+6. **Multi-language:** i18n support
+7. **Dark Mode:** Theme toggle
+8. **Mobile App:** React Native version
 
 ---
 
-**Last Updated:** May 2026
-**Version:** 1.2.0
+**Last Updated:** July 2026
+**Version:** 1.4.0

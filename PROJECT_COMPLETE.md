@@ -107,9 +107,14 @@ A **production-ready**, **fully-functional** Planning Poker application with:
 - [x] Host can add notes after revealing votes
 - [x] Host controls (reveal/reset)
 - [x] Topic history with scores and notes
+- [x] Countdown timer per topic (host configurable)
+- [x] Real-time countdown display for all participants
+- [x] Automatic overtime detection with red UI indicator
+- [x] Discussion duration tracking
 - [x] Session summary (view all completed topics)
 - [x] Print session summary
 - [x] Copy session summary to clipboard
+- [x] Overtime and discussion time in session summary
 
 ### ⚡ Real-time Features
 - [x] Supabase Realtime WebSocket

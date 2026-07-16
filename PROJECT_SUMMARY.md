@@ -92,9 +92,14 @@ planningpokeronlineforfree/
 - [x] View all topics in a room
 - [x] See completed topics with scores and notes
 - [x] Topic history per room
+- [x] Countdown timer per topic (host configurable)
+- [x] Real-time countdown display for all participants
+- [x] Automatic overtime detection with red UI indicator
+- [x] Discussion duration tracking
 - [x] Session summary with all completed topics
 - [x] Print session summary
 - [x] Copy session summary to clipboard
+- [x] Overtime and discussion time in session summary
 
 ### ✅ Participant Features
 - [x] Edit your own display name
@@ -131,7 +136,7 @@ planningpokeronlineforfree/
    - `id`, `room_id`, `display_name`, `is_host`, `joined_at`, `last_seen_at`
 
 3. **`topics`** - Stories/tasks to estimate
-   - `id`, `room_id`, `title`, `description`, `is_active`, `is_revealed`, `average_score`, `created_at`, `completed_at`
+   - `id`, `room_id`, `title`, `description`, `is_active`, `is_revealed`, `average_score`, `timer_enabled`, `timer_seconds`, `discussion_started_at`, `discussion_duration_seconds`, `is_overtime`, `created_at`, `completed_at`
 
 4. **`votes`** - Individual votes
    - `id`, `topic_id`, `participant_id`, `vote_value`, `created_at`, `updated_at`
