@@ -29,6 +29,8 @@ export default function RoomPage() {
   const params = useParams()
   const router = useRouter()
   const inviteCode = params.inviteCode as string
+  // Reads from env: NEXT_PUBLIC_IS_HIDE_TIMER=true hides the countdown timer UI
+  const isHideTimer = process.env.NEXT_PUBLIC_IS_HIDE_TIMER === 'true'
 
   // State
   const [room, setRoom] = useState<Room | null>(null)
@@ -608,6 +610,7 @@ export default function RoomPage() {
               topics={topics}
               activeTopic={activeTopic}
               isHost={currentUser?.is_host || false}
+              isHideTimer={isHideTimer}
               onTopicCreated={loadTopics}
               onTopicSelected={handleTopicSelected}
             />
@@ -626,7 +629,7 @@ export default function RoomPage() {
                       <h3 className="text-lg font-semibold text-slate-700">
                         {isObserver ? 'Waiting for Votes (Observer Mode)' : 'Cast Your Vote'}
                       </h3>
-                      {activeTopic.timer_enabled && activeTopic.discussion_started_at && activeTopic.timer_seconds !== null && (
+                      {!isHideTimer && activeTopic.timer_enabled && activeTopic.discussion_started_at && activeTopic.timer_seconds !== null && (
                         (() => {
                           const elapsedSeconds = Math.max(
                             0,
@@ -679,6 +682,7 @@ export default function RoomPage() {
                     isRevealed={activeTopic.is_revealed}
                     topic={activeTopic}
                     isHost={currentUser?.is_host || false}
+                    isHideTimer={isHideTimer}
                     onTopicUpdated={loadTopics}
                   />
                 )}
@@ -732,6 +736,7 @@ export default function RoomPage() {
       {/* Session Summary Modal */}
       <SessionSummary
         isOpen={showSummary}
+        isHideTimer={isHideTimer}
         onClose={() => setShowSummary(false)}
         roomId={room!.id}
       />

@@ -13,6 +13,7 @@ interface ResultsPanelProps {
   isRevealed: boolean
   topic: Topic
   isHost: boolean
+  isHideTimer?: boolean
   onTopicUpdated?: () => void
 }
 
@@ -22,6 +23,7 @@ export default function ResultsPanel({
   isRevealed,
   topic,
   isHost,
+  isHideTimer = false,
   onTopicUpdated,
 }: ResultsPanelProps) {
   const [isEditingDescription, setIsEditingDescription] = useState(false)
@@ -206,16 +208,18 @@ export default function ResultsPanel({
         </div>
       )}
 
-      <div className="mb-6 flex flex-wrap gap-2 text-xs">
-        <span className="rounded-full bg-slate-200 px-3 py-1 font-medium text-slate-700">
-          Time used: {formatDuration(discussionTimeSeconds)}
-        </span>
-        {topic.is_overtime && (
-          <span className="rounded-full bg-red-600 px-3 py-1 font-medium text-white">
-            Overtime
+      {!isHideTimer && (
+        <div className="mb-6 flex flex-wrap gap-2 text-xs">
+          <span className="rounded-full bg-slate-200 px-3 py-1 font-medium text-slate-700">
+            Time used: {formatDuration(discussionTimeSeconds)}
           </span>
-        )}
-      </div>
+          {topic.is_overtime && (
+            <span className="rounded-full bg-red-600 px-3 py-1 font-medium text-white">
+              Overtime
+            </span>
+          )}
+        </div>
+      )}
 
       {/* Host Description Section */}
       {isHost && (

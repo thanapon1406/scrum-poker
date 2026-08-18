@@ -10,6 +10,7 @@ interface TopicManagerProps {
   topics: Topic[]
   activeTopic: Topic | null
   isHost: boolean
+  isHideTimer?: boolean
   onTopicCreated: () => void
   onTopicSelected: (topicId: string) => void
 }
@@ -19,6 +20,7 @@ export default function TopicManager({
   topics,
   activeTopic,
   isHost,
+  isHideTimer = false,
   onTopicCreated,
   onTopicSelected,
 }: TopicManagerProps) {
@@ -136,37 +138,39 @@ export default function TopicManager({
             rows={2}
             maxLength={500}
           />
-          <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 space-y-3">
-            <label className="flex items-center gap-3 text-sm font-medium text-slate-700">
-              <input
-                type="checkbox"
-                checked={timerEnabled}
-                onChange={(e) => setTimerEnabled(e.target.checked)}
-                className="h-4 w-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
-              />
-              Enable countdown timer
-            </label>
-            {timerEnabled && (
-              <div className="space-y-1">
-                <label className="block text-xs font-medium uppercase tracking-wide text-slate-500">
-                  Countdown seconds
-                </label>
+          {!isHideTimer && (
+            <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 space-y-3">
+              <label className="flex items-center gap-3 text-sm font-medium text-slate-700">
                 <input
-                  type="number"
-                  min={1}
-                  step={1}
-                  inputMode="numeric"
-                  value={timerSeconds}
-                  onChange={(e) => setTimerSeconds(e.target.value)}
-                  placeholder="60"
-                  className="input"
+                  type="checkbox"
+                  checked={timerEnabled}
+                  onChange={(e) => setTimerEnabled(e.target.checked)}
+                  className="h-4 w-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500"
                 />
-                <p className="text-xs text-slate-500">
-                  Enter seconds only. For example, 60 means 60 seconds.
-                </p>
-              </div>
-            )}
-          </div>
+                Enable countdown timer
+              </label>
+              {timerEnabled && (
+                <div className="space-y-1">
+                  <label className="block text-xs font-medium uppercase tracking-wide text-slate-500">
+                    Countdown seconds
+                  </label>
+                  <input
+                    type="number"
+                    min={1}
+                    step={1}
+                    inputMode="numeric"
+                    value={timerSeconds}
+                    onChange={(e) => setTimerSeconds(e.target.value)}
+                    placeholder="60"
+                    className="input"
+                  />
+                  <p className="text-xs text-slate-500">
+                    Enter seconds only. For example, 60 means 60 seconds.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
           <button
             type="submit"
             disabled={isCreating || !newTopicTitle.trim()}
@@ -187,11 +191,11 @@ export default function TopicManager({
           </p>
         ) : (
           topics.map((topic) => (
-            <div
+              <div
               key={topic.id}
               className={`p-3 rounded-lg border transition-colors ${
                 topic.id === activeTopic?.id
-                  ? topic.is_overtime && !topic.is_revealed
+                  ? !isHideTimer && topic.is_overtime && !topic.is_revealed
                     ? 'bg-red-50 border-red-300'
                     : 'bg-primary-50 border-primary-300'
                   : topic.is_revealed
@@ -223,11 +227,11 @@ export default function TopicManager({
                     {topic.id === activeTopic?.id && (
                       <span
                         className={`text-xs text-white px-2 py-0.5 rounded flex items-center gap-1 ${
-                          topic.is_overtime && !topic.is_revealed ? 'bg-red-500' : 'bg-primary-500'
+                          !isHideTimer && topic.is_overtime && !topic.is_revealed ? 'bg-red-500' : 'bg-primary-500'
                         }`}
                       >
-                        {topic.is_overtime && !topic.is_revealed ? 'Overtime' : 'Active'}
-                        {topic.timer_enabled && topic.discussion_started_at && !topic.is_revealed && topic.timer_seconds !== null && (() => {
+                        {!isHideTimer && topic.is_overtime && !topic.is_revealed ? 'Overtime' : 'Active'}
+                        {!isHideTimer && topic.timer_enabled && topic.discussion_started_at && !topic.is_revealed && topic.timer_seconds !== null && (() => {
                           const remainingSeconds = getRemainingSeconds(topic)
 
                           return remainingSeconds !== null ? (
@@ -236,7 +240,7 @@ export default function TopicManager({
                             </span>
                           ) : null
                         })()}
-                        {topic.timer_enabled && topic.discussion_duration_seconds !== null && topic.is_revealed && (
+                        {!isHideTimer && topic.timer_enabled && topic.discussion_duration_seconds !== null && topic.is_revealed && (
                           <span className="opacity-90">
                             · {formatDuration(topic.discussion_duration_seconds)}
                           </span>

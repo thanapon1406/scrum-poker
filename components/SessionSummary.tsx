@@ -8,6 +8,7 @@ import { formatAverageResult, formatDuration } from '@/lib/utils'
 interface SessionSummaryProps {
   roomId: string
   isOpen: boolean
+  isHideTimer?: boolean
   onClose: () => void
 }
 
@@ -23,6 +24,7 @@ interface TopicWithVotes extends Topic {
 export default function SessionSummary({
   roomId,
   isOpen,
+  isHideTimer = false,
   onClose,
 }: SessionSummaryProps) {
   const [topics, setTopics] = useState<TopicWithVotes[]>([])
@@ -175,9 +177,11 @@ export default function SessionSummary({
       const voteValues = topic.votes.map(v => v.vote_value)
       const result = formatAverageResult(voteValues)
       html += `<div class="result">Final Result: ${result}</div>`
-      html += `<div class="result">Discussion Time: ${formatDuration(getTopicDurationSeconds(topic))}</div>`
-      if (topic.is_overtime) {
-        html += `<div class="result" style="color:#dc2626;">Overtime</div>`
+      if (!isHideTimer) {
+        html += `<div class="result">Discussion Time: ${formatDuration(getTopicDurationSeconds(topic))}</div>`
+        if (topic.is_overtime) {
+          html += `<div class="result" style="color:#dc2626;">Overtime</div>`
+        }
       }
 
       html += `<div class="votes">`
@@ -215,9 +219,11 @@ export default function SessionSummary({
       const voteValues = topic.votes.map(v => v.vote_value)
       const result = formatAverageResult(voteValues)
       text += `Final Result: ${result}\n\n`
-      text += `Discussion Time: ${formatDuration(getTopicDurationSeconds(topic))}\n\n`
-      if (topic.is_overtime) {
-        text += `Overtime: Yes\n\n`
+      if (!isHideTimer) {
+        text += `Discussion Time: ${formatDuration(getTopicDurationSeconds(topic))}\n\n`
+        if (topic.is_overtime) {
+          text += `Overtime: Yes\n\n`
+        }
       }
 
       text += 'Individual Votes:\n'
@@ -282,7 +288,7 @@ export default function SessionSummary({
                   <div
                     key={topic.id}
                     className={`rounded-lg p-5 border print:mb-4 ${
-                      isOvertime
+                      !isHideTimer && isOvertime
                         ? 'bg-red-50 border-red-200 print:border-red-300'
                         : 'bg-slate-50 border-slate-200 print:border-slate-300'
                     }`}
@@ -308,10 +314,12 @@ export default function SessionSummary({
                     </div>
 
                     <div className="mb-4 flex flex-wrap gap-2 text-xs">
-                      <span className="rounded-full bg-slate-200 px-3 py-1 font-medium text-slate-700">
-                        Discussion time: {formatDuration(getTopicDurationSeconds(topic))}
-                      </span>
-                      {isOvertime && (
+                      {!isHideTimer && (
+                        <span className="rounded-full bg-slate-200 px-3 py-1 font-medium text-slate-700">
+                          Discussion time: {formatDuration(getTopicDurationSeconds(topic))}
+                        </span>
+                      )}
+                      {!isHideTimer && isOvertime && (
                         <span className="rounded-full bg-red-600 px-3 py-1 font-medium text-white">
                           Overtime
                         </span>
